@@ -8,6 +8,9 @@ import java.util.Queue;
  */
 public class Scheduler implements Runnable {
 
+    private enum SchedulerState {WAITING_FOR_MESSAGE, ASSIGNING_TO_DRONE};
+
+    private SchedulerState state;
     private Box fireIncidentSendBox;
     private Box fireIncidentReceiveBox;
     private Box droneSendBox;
@@ -19,6 +22,7 @@ public class Scheduler implements Runnable {
      * Constructor for Scheduler.
      */
     public Scheduler(Box fireIncidentSendBox, Box droneSendBox, Box fireIncidentReceiveBox, Box droneReceiveBox) {
+        this.state = SchedulerState.WAITING_FOR_MESSAGE;
         this.fireIncidentSendBox = fireIncidentSendBox;
         this.droneSendBox = droneSendBox;
         this.fireIncidentReceiveBox = fireIncidentReceiveBox;
@@ -29,27 +33,36 @@ public class Scheduler implements Runnable {
     @Override
     public void run() {
         while (true) {
-            // Retrieve incident message from FireIncidentSubsystem
-            Object iMessage = fireIncidentReceiveBox.get();
-            if (iMessage instanceof IncidentMessage) {
-                IncidentMessage incident = (IncidentMessage) iMessage;
-                incidentQueue.add(incident);
+
+            switch (state) {
+                case WAITING_FOR_MESSAGE:
+                    // Retrieve incident message from FireIncidentSubsystem
+                    Object iMessage = fireIncidentReceiveBox.get();
+                    if (iMessage instanceof IncidentMessage) {
+                        IncidentMessage incident = (IncidentMessage) iMessage;
+                        incidentQueue.add(incident);
+                    }
+                    state = SchedulerState.ASSIGNING_TO_DRONE;
+                    break;
+                case ASSIGNING_TO_DRONE:
+                    // If there are pending incidents, try to assign them to a drone
+                    if (!incidentQueue.isEmpty()) {
+                        IncidentMessage nextIncident = incidentQueue.poll();
+                        System.out.println("Scheduler assigned incident: " + nextIncident.getType() + " at Zone " + nextIncident.getStartX());
+
+                        droneSendBox.put(nextIncident); // Assign to a drone
+
+                        // Wait for drone completion confirmation
+                        Object droneAck = droneReceiveBox.get();
+                        if (droneAck instanceof Boolean && (Boolean) droneAck) {
+                            fireIncidentSendBox.put(true); // Notify FireIncidentSubsystem of completion
+                            System.out.println("Scheduler marked incident as resolved.");
+                        }
+                    }
+                    state = SchedulerState.WAITING_FOR_MESSAGE;
+                    break;
             }
-
-            // If there are pending incidents, try to assign them to a drone
-            if (!incidentQueue.isEmpty()) {
-                IncidentMessage nextIncident = incidentQueue.poll();
-                System.out.println("Scheduler assigned incident: " + nextIncident.getType() + " at Zone " + nextIncident.getStartX());
-
-                droneSendBox.put(nextIncident); // Assign to a drone
-
-                // Wait for drone completion confirmation
-                Object droneAck = droneReceiveBox.get();
-                if (droneAck instanceof Boolean && (Boolean) droneAck) {
-                    fireIncidentSendBox.put(true); // Notify FireIncidentSubsystem of completion
-                    System.out.println("Scheduler marked incident as resolved.");
-                }
-            }
+            
         }
     }
 }
