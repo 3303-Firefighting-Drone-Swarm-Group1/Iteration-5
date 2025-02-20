@@ -1,5 +1,5 @@
 /**
- * A test class for the Incident class.
+ * A test class for the IncidentMessage class.
  * @author Lucas Warburton (101276823)
  */
 
