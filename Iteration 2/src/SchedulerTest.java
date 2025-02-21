@@ -16,7 +16,7 @@
          Box fireSendBox = new Box();
          Box fireReceiveBox = new Box();
          Box droneSendBox = new Box();
-         Box droneReveiveBox = new Box();
+         Box droneReceiveBox = new Box();
  
          Thread schedulerThread = new Thread(new Scheduler(fireSendBox, droneSendBox, fireReceiveBox, droneReveiveBox));
          schedulerThread.start();
@@ -25,7 +25,7 @@
          fireReceiveBox.put(testMessage);
          assertEquals(testMessage, droneSendBox.get());
  
-         droneReveiveBox.put(true);
+         droneReceiveBox.put(true);
          assertTrue((boolean)fireSendBox.get());
      }
  }
