@@ -1,5 +1,5 @@
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
 import java.io.File;
 import java.util.Scanner;
 
@@ -8,7 +8,7 @@ import java.util.Scanner;
  * Iteration 1 Feb 1, 2025
  */
 
-class SystemTest {
+class FireIncidentSubsystemTest {
 
     private static final String ZONE_FILE = "input/sample_zone_file.csv";
     private static final String EVENT_FILE = "input/Sample_event_file.csv";;
@@ -19,18 +19,18 @@ class SystemTest {
         File zoneFile = new File(ZONE_FILE);
         File eventFile = new File(EVENT_FILE);
 
-        assertTrue(zoneFile.exists(), "Zone input file is missing!");
-        assertTrue(eventFile.exists(), "Event input file is missing!");
+        assertTrue("Zone input file is missing!", zoneFile.exists());
+        assertTrue("Event input file is missing!", eventFile.exists());
 
         // Check if files can be read
         try (Scanner zoneScanner = new Scanner(zoneFile)) {
-            assertTrue(zoneScanner.hasNextLine(), "Zone file is empty!");
+            assertTrue("Zone file is empty!", zoneScanner.hasNextLine());
         } catch (Exception e) {
             fail("Failed to read zone file: " + e.getMessage());
         }
 
         try (Scanner eventScanner = new Scanner(eventFile)) {
-            assertTrue(eventScanner.hasNextLine(), "Event file is empty!");
+            assertTrue("Event file is empty!", eventScanner.hasNextLine());
         } catch (Exception e) {
             fail("Failed to read event file: " + e.getMessage());
         }
@@ -60,7 +60,7 @@ class SystemTest {
         Thread.sleep(5000);
 
         // scheduler processed at least one incident
-        assertTrue(fireSystem.getNumCompleted() > 0, "No incidents were fully processed.");
+        assertTrue("No incidents were fully processed.", fireSystem.getNumCompleted() > 0);
 
         // terminate threads
         fireThread.interrupt();
