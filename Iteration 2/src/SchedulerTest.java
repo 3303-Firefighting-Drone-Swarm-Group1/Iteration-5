@@ -18,7 +18,7 @@
          Box droneSendBox = new Box();
          Box droneReceiveBox = new Box();
  
-         Thread schedulerThread = new Thread(new Scheduler(fireSendBox, droneSendBox, fireReceiveBox, droneReveiveBox));
+         Thread schedulerThread = new Thread(new Scheduler(fireSendBox, droneSendBox, fireReceiveBox, droneReceiveBox));
          schedulerThread.start();
  
          IncidentMessage testMessage = new IncidentMessage(Incident.Severity.LOW, new Point(1, 1), new Point(2, 2), new Time(((5* 60 + 5)* 60 + 5) * 1000), Incident.Type.FIRE_DETECTED);
