@@ -1,5 +1,11 @@
 # Iteration-2
-Written by Ahmed Babar
+
+### Contributions in this Iteration
+- UML Diagrams: Sam Touma
+- Coding: Abdul Aziz, Marc Fernandes
+- Testing: Lucas Warburton
+- README: Ahmed Babar
+
 ## How to Run
 
 1. Download file using .zip on Github. Extract project.
@@ -9,11 +15,10 @@ Written by Ahmed Babar
 
 1. Changes to Scheduler implementation. 
 - Created States for clear behaviour of Scheduler.
-- Updated how Incidents are stored and handled.
+- Updated how Incidents are stored and scheduled.
 - Implemented white-box testing.
 
 2. Changes to Drone implementation.
-
 
 ![State Machine](Iteration 2/diagrams/SYSC_3303_Iteration_2_state_Machine.png)
 - Created States for clear behaviour of Drone.
