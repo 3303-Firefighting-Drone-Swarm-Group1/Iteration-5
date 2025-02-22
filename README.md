@@ -15,7 +15,7 @@ Written by Ahmed Babar
 2. Changes to Drone implementation.
 
 
-![State Machine](/diagrams/SYSC_3303_Iteration_2_state_Machine.PNG)
+![State Machine](Iteration 2/diagrams/SYSC_3303_Iteration_2_state_Machine.png)
 - Created States for clear behaviour of Drone.
 - Implemented white-box testing.
 
@@ -24,6 +24,6 @@ Written by Ahmed Babar
 
 ## Related Diagrams:
 ### Class Diagram of all interacting systems
-![Class Diagram][Iteration 2/diagrams/SYSC_3303_Iteration_2_UML_CLASS1.PNG]
+![Class Diagram](Iteration 2/diagrams/SYSC_3303_Iteration_2_UML_CLASS1.PNG)
 ### UML Sequence Diagram
 ![Sequence Diagram](Iteration 2/diagrams/SYSC_3303_Assignment_2_UML_Sequence.PNG)
