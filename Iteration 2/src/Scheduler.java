@@ -9,8 +9,11 @@ import java.util.Queue;
 public class Scheduler implements Runnable {
 
     private enum SchedulerState {WAITING_FOR_MESSAGE, ASSIGNING_TO_DRONE};
-
     private SchedulerState state;
+
+    /*
+    * Communication between each system is carried out using Box Objects. You can think of them as Endpoints
+    */
     private Box fireIncidentSendBox;
     private Box fireIncidentReceiveBox;
     private Box droneSendBox;
