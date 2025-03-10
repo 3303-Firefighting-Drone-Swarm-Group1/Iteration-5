@@ -1,10 +1,14 @@
-# Iteration-2
+# Iteration-3
 
 ### Contributions in this Iteration
-- UML Diagrams: Sam Touma
-- Coding: Abdul Aziz, Marc Fernandes
-- Testing: Lucas Warburton
-- README: Ahmed Babar
+# iteration-3
+Iteration 3
+
+Contributions
+README.TXT - Marc
+UML Diagrams - Ahmed Babar
+Coding - Lucas Sam
+Testing - Abdul Aziz
 
 ## How to Run
 
