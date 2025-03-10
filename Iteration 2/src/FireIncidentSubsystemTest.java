@@ -11,7 +11,7 @@ import java.util.Scanner;
 class FireIncidentSubsystemTest {
 
     private static final String ZONE_FILE = "input/sample_zone_file.csv";
-    private static final String EVENT_FILE = "input/Sample_event_file.csv";;
+    private static final String EVENT_FILE = "input/Sample_event_file.csv";
 
     @Test
     void testFileReading() {
