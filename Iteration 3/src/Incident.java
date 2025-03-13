@@ -3,16 +3,17 @@
  * @author Lucas Warburton, 101276823
  */
 
- import java.sql.Time;
+import java.io.Serializable;
+import java.sql.Time;
 
-public class Incident {
-    public enum Severity {
+public class Incident implements Serializable {
+    public enum Severity implements Serializable {
         LOW,
         MODERATE,
         HIGH
     }
 
-    public enum Type {
+    public enum Type implements Serializable {
         FIRE_DETECTED,
         DRONE_REQUEST
     }
@@ -21,9 +22,9 @@ public class Incident {
     private int id;
     private Severity severity;
     private Type type;
-    
-    public Incident(int hour, int minute, int second, int id, Severity severity, Type type){
-        time = new Time(((hour* 60 + minute)* 60 + second) * 1000);
+
+    public Incident(int hour, int minute, int second, int id, Severity severity, Type type) {
+        this.time = new Time(((hour * 60 + minute) * 60 + second) * 1000);
         this.id = id;
         this.severity = severity;
         this.type = type;

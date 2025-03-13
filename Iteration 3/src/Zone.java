@@ -4,17 +4,18 @@
  */
 
 import java.awt.Point;
+import java.io.Serializable;
 
-public class Zone {
+public class Zone implements Serializable {
     private Point start;
     private Point end;
 
-    public Zone(int startx, int starty, int endx, int endy){
+    public Zone(int startx, int starty, int endx, int endy) {
         start = new Point(Math.min(startx, endx), Math.min(starty, endy));
         end = new Point(Math.max(startx, endx), Math.max(starty, endy));
     }
 
-    public Zone(Point start, Point end){
+    public Zone(Point start, Point end) {
         this.start = start;
         this.end = end;
     }

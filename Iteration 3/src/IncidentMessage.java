@@ -4,17 +4,17 @@
  */
 
 import java.sql.Time;
-
+import java.io.Serializable;
 import java.awt.Point;
 
-public class IncidentMessage {
+public class IncidentMessage implements Serializable {
     private Incident.Severity severity;
     private Point start;
     private Point end;
     private Time time;
     private Incident.Type type;
 
-    public IncidentMessage(Incident.Severity severity, Point start, Point end, Time time, Incident.Type type){
+    public IncidentMessage(Incident.Severity severity, Point start, Point end, Time time, Incident.Type type) {
         this.severity = severity;
         this.start = start;
         this.end = end;
