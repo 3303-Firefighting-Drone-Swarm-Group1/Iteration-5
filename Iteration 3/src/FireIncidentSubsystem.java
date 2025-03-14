@@ -39,17 +39,19 @@ public class FireIncidentSubsystem implements Runnable {
 
         System.out.printf("There are %d incidents loaded.\n", incidents.size());
 
+        ArrayList<IncidentMessage> messages = new ArrayList<>();
+
         for (Incident incident : incidents) {
             IncidentMessage message = new IncidentMessage(incident.getSeverity(), zones.get(incident.getID()).getStart(),
                     zones.get(incident.getID()).getEnd(), incident.getTime(), incident.getType());
 
             System.out.println("Scheduler assigned incident: " + incident.getType() + " at Zone " + incident.getID());
 
-            schedulerClient.sendRequest(message);
+            messages.add(message);
 
             System.out.println("Fire Incident Received Job Completion Token.");
         }
-        schedulerClient.sendRequest(null); // Signal end of input
+        schedulerClient.sendRequest(messages);
     }
 
     private HashMap<Integer, Zone> readZones() throws FileNotFoundException {

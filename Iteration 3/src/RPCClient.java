@@ -4,16 +4,26 @@ import java.net.*;
 public class RPCClient {
     private String host;
     private int port;
+    private Socket socket;
 
     public RPCClient(String host, int port) {
         this.host = host;
         this.port = port;
     }
 
+    public int getPort(){
+        return port;
+    }
+
+    public Socket getSocket(){
+        return socket;
+    }
+
     public Object sendRequest(Object request) {
-        try (Socket socket = new Socket(host, port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+        try {
+            socket = new Socket(host, port);
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
             // Send the request object
             out.writeObject(request);

@@ -82,6 +82,10 @@ public class IncidentMessage implements Serializable {
         return new Point(closestX, closestY);
     }
 
+    public double getDistance(){
+        return Point.distance((getStartX() + getEndX()) / 2, (getStartY() + getEndY()) / 2, 0, 0);
+    }
+
     /**
      * Gets the time at which the incident happened.
      * @return the time
