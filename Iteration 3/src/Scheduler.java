@@ -1,3 +1,4 @@
+import java.net.InetAddress;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,10 +18,12 @@ public class Scheduler {
     private ArrayList<RPCClient> availableDrones;
     
 
-    public Scheduler(String droneHost, int dronePort) {
+    public Scheduler(InetAddress droneHost, int dronePort) {
         this.incidentQueue = new LinkedList<>();
         this.droneClient = new RPCClient(droneHost, dronePort);
         availableDrones = new ArrayList<>();
+
+        droneClient.sendRequest("join:" + dronePort);
     }
 
     public Object handleRequest(Object request) {
@@ -70,9 +73,8 @@ public class Scheduler {
             }
 
             while (ready.size() != 0 && availableDrones.size() != 0){
-                availableDrones.get(0).sendRequest(ready.get(0));
                 scheduled.add(ready.remove(0));
-                unavailableDrones.put(availableDrones.remove(0), new Time(0)); // RECEIVE TIME
+                unavailableDrones.put(availableDrones.remove(0), (Time) availableDrones.get(0).sendRequest(ready.get(0))); // RECEIVE TIME
             }
         }
     }

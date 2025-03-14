@@ -1,6 +1,9 @@
 import static java.lang.Math.ceil;
 import static java.lang.Math.sqrt;
 
+import java.net.InetAddress;
+import java.sql.Time;
+
 /***
  * Drone subsystem with a state machine to manage firefighting operations.
  * @author ahmedbabar, modified by Abdulaziz Alsibakhi
@@ -26,7 +29,7 @@ public class DroneSubsystem {
     private double distance;
     private double numReturnTrips;
 
-    public DroneSubsystem(String schedulerHost, int schedulerPort) {
+    public DroneSubsystem(InetAddress schedulerHost, int schedulerPort) {
         this.state = DroneState.IDLE;
         this.schedulerClient = new RPCClient(schedulerHost, schedulerPort);
     }
@@ -36,7 +39,7 @@ public class DroneSubsystem {
             currentJobDetails = (IncidentMessage) request;
             System.out.println("Drone received incident: " + currentJobDetails.getType() + " at Zone " + currentJobDetails.getStartX());
             processIncident(currentJobDetails);
-            return true; // Notify scheduler of job completion
+            return new Time((long)(currentJobDetails.getTime().getTime() + timeTaken * 1000)); // Notify scheduler of job completion
         }
         return null;
     }

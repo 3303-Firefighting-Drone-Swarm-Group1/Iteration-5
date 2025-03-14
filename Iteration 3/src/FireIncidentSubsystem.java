@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -15,7 +16,7 @@ public class FireIncidentSubsystem implements Runnable {
     private String zoneInput, eventInput;
     private RPCClient schedulerClient;
 
-    public FireIncidentSubsystem(String zoneInput, String eventInput, String schedulerHost, int schedulerPort) {
+    public FireIncidentSubsystem(String zoneInput, String eventInput, InetAddress schedulerHost, int schedulerPort) {
         this.zoneInput = zoneInput;
         this.eventInput = eventInput;
         this.schedulerClient = new RPCClient(schedulerHost, schedulerPort);

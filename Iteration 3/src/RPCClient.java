@@ -2,11 +2,10 @@ import java.io.*;
 import java.net.*;
 
 public class RPCClient {
-    private String host;
+    private InetAddress host;
     private int port;
-    private Socket socket;
 
-    public RPCClient(String host, int port) {
+    public RPCClient(InetAddress host, int port) {
         this.host = host;
         this.port = port;
     }
@@ -15,13 +14,10 @@ public class RPCClient {
         return port;
     }
 
-    public Socket getSocket(){
-        return socket;
-    }
 
     public Object sendRequest(Object request) {
         try {
-            socket = new Socket(host, port);
+            Socket socket = new Socket(host, port);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
@@ -29,8 +25,11 @@ public class RPCClient {
             out.writeObject(request);
             out.flush();
 
+            Object o = in.readObject();
+            socket.close();
+
             // Receive the response object
-            return in.readObject();
+            return o;
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             return null;
