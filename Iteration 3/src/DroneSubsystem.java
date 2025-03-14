@@ -29,34 +29,29 @@ public class DroneSubsystem {
     private double distance;
     private double numReturnTrips;
 
-    public DroneSubsystem(InetAddress schedulerHost, int schedulerPort) {
+    public DroneSubsystem(String schedulerHost, int schedulerPort, int dronePort) {
         this.state = DroneState.IDLE;
+        new Thread(new RPCServer(dronePort, this)).start(); // Start DroneSubsystem's RPC server
         this.schedulerClient = new RPCClient(schedulerHost, schedulerPort);
+        schedulerClient.sendRequest("join:" + dronePort);
     }
 
     public Object handleRequest(Object request) {
         if (request instanceof IncidentMessage) {
             currentJobDetails = (IncidentMessage) request;
-            System.out.println("Drone received incident: " + currentJobDetails.getType() + " at Zone " + currentJobDetails.getStartX());
+            System.out.println("\nDrone received incident: " + currentJobDetails.getType());
             processIncident(currentJobDetails);
-            return new Time((long)(currentJobDetails.getTime().getTime() + timeTaken * 1000)); // Notify scheduler of job completion
+
+            return timeTaken * 1000; // Notify scheduler of job completion
         }
         return null;
     }
 
     private void processIncident(IncidentMessage incident) {
         state = DroneState.EN_ROUTE;
-        System.out.println("Drone en route to fire at Zone " + currentJobDetails.getStartX());
+        System.out.println("Drone en route to fire at X,Y " + (currentJobDetails.getStartX() + currentJobDetails.getEndX())/2 + "," + (currentJobDetails.getStartY() + currentJobDetails.getEndY())/2);
 
         extinguishFire();
-
-        state = DroneState.RETURNING_TO_BASE;
-        returnToBase();
-    }
-
-    private void moveToFire() {
-        System.out.println("Drone en route to fire at Zone " + currentJobDetails.getStartX());
-        state = DroneState.DROPPING_AGENT;
     }
 
     private void extinguishFire() {
@@ -83,11 +78,9 @@ public class DroneSubsystem {
     }
 
     private void notifyJobCompletion() {
-        System.out.println("Drone completed job. Notifying scheduler.");
     }
 
     private void returnToBase() {
-        System.out.println("Drone returning to base...");
         state = DroneState.IDLE;
     }
 

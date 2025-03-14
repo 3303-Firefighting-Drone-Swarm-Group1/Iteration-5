@@ -3,22 +3,22 @@ import java.net.InetAddress;
 public class Main {
 
     // Define host and ports
-    private static InetAddress SCHEDULER_HOST;
+    private static final String SCHEDULER_HOST = "localhost";
     private static final int SCHEDULER_PORT = 5000; // Port for Scheduler's RPC server
-    private static final int DRONE_PORT = 6000;     // Port for DroneSubsystem's RPC server
+
 
     // Main method for starting the Scheduler
     public static void startScheduler() {
-        Scheduler scheduler = new Scheduler(SCHEDULER_HOST, 25535);
-        new Thread(new RPCServer(SCHEDULER_PORT, scheduler)).start(); // Start Scheduler's RPC server
+        Scheduler scheduler = new Scheduler(SCHEDULER_PORT);
+        
         System.out.println("Scheduler started on port " + SCHEDULER_PORT);
     }
 
     // Main method for starting the DroneSubsystem
-    public static void startDroneSubsystem() {
-        DroneSubsystem drone = new DroneSubsystem(SCHEDULER_HOST, 25534);
-        new Thread(new RPCServer(DRONE_PORT, drone)).start(); // Start DroneSubsystem's RPC server
-        System.out.println("DroneSubsystem started on port " + DRONE_PORT);
+    public static void startDroneSubsystem(int dronePort) {
+        DroneSubsystem drone = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, dronePort);
+        
+        System.out.println("DroneSubsystem started on port " + dronePort);
     }
 
     // Main method for starting the FireIncidentSubsystem
@@ -34,16 +34,17 @@ public class Main {
 
     // Main method (entry point)
     public static void main(String[] args) {
-        try {
-            SCHEDULER_HOST = InetAddress.getLocalHost();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         // Start the Scheduler
         startScheduler();
 
         // Start the DroneSubsystem
-        startDroneSubsystem();
+        startDroneSubsystem(6000);
+        startDroneSubsystem(6001);
+
+        try{
+            Thread.sleep(10);
+        } catch (Exception e){}
 
         // Start the FireIncidentSubsystem
         startFireIncidentSubsystem();

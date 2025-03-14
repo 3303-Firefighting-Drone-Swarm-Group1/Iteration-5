@@ -16,7 +16,7 @@ public class FireIncidentSubsystem implements Runnable {
     private String zoneInput, eventInput;
     private RPCClient schedulerClient;
 
-    public FireIncidentSubsystem(String zoneInput, String eventInput, InetAddress schedulerHost, int schedulerPort) {
+    public FireIncidentSubsystem(String zoneInput, String eventInput, String schedulerHost, int schedulerPort) {
         this.zoneInput = zoneInput;
         this.eventInput = eventInput;
         this.schedulerClient = new RPCClient(schedulerHost, schedulerPort);
@@ -38,7 +38,7 @@ public class FireIncidentSubsystem implements Runnable {
             throw new RuntimeException("Incident file not found: " + e.getMessage());
         }
 
-        System.out.printf("There are %d incidents loaded.\n", incidents.size());
+        System.out.printf("\nThere are %d incidents loaded.\n", incidents.size());
 
         ArrayList<IncidentMessage> messages = new ArrayList<>();
 
@@ -46,12 +46,11 @@ public class FireIncidentSubsystem implements Runnable {
             IncidentMessage message = new IncidentMessage(incident.getSeverity(), zones.get(incident.getID()).getStart(),
                     zones.get(incident.getID()).getEnd(), incident.getTime(), incident.getType());
 
-            System.out.println("Scheduler assigned incident: " + incident.getType() + " at Zone " + incident.getID());
 
             messages.add(message);
 
-            System.out.println("Fire Incident Received Job Completion Token.");
         }
+        System.out.println("FireIncidentSubsystem sent incident list.");
         schedulerClient.sendRequest(messages);
     }
 

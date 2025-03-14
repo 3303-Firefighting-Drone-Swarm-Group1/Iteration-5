@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 
 /***
  * This is a class where data is exchanged between Fire Incident System and the Drones
@@ -13,17 +14,14 @@ import java.util.Queue;
 
 public class Scheduler {
     private Queue<IncidentMessage> incidentQueue;
-    private RPCClient droneClient;
     private ArrayList<IncidentMessage> newMessages;
     private ArrayList<RPCClient> availableDrones;
     
 
-    public Scheduler(InetAddress droneHost, int dronePort) {
+    public Scheduler(int schedulerPort) {
         this.incidentQueue = new LinkedList<>();
-        this.droneClient = new RPCClient(droneHost, dronePort);
         availableDrones = new ArrayList<>();
-
-        droneClient.sendRequest("join:" + dronePort);
+        new Thread(new RPCServer(schedulerPort, this)).start(); // Start Scheduler's RPC server
     }
 
     public Object handleRequest(Object request) {
@@ -33,6 +31,7 @@ public class Scheduler {
         } else if (request instanceof String){
             if (((String)request).split(":")[0].equals("join")){
                 availableDrones.add(new RPCClient(null, Integer.parseInt(((String)request).split(":")[1])));
+                System.out.println("Drone joined scheduler.");
             } else if (((String)request).split(":")[0].equals("leave")){
                 for (int i = 0; i < availableDrones.size(); i++){
                     if (availableDrones.get(i).getPort() == Integer.parseInt(((String)request).split(":")[1])){
@@ -49,18 +48,32 @@ public class Scheduler {
     }
 
     private void schedule(){
-        HashMap<RPCClient, Time> unavailableDrones = new HashMap<>();
-        ArrayList<IncidentMessage> ready = new ArrayList<>();
+        ConcurrentHashMap<RPCClient, Time> unavailableDrones = new ConcurrentHashMap<>();
+        ArrayList<IncidentMessage> readyHigh = new ArrayList<>();
+        ArrayList<IncidentMessage> readyModerate = new ArrayList<>();
+        ArrayList<IncidentMessage> readyLow = new ArrayList<>();
         ArrayList<IncidentMessage> scheduled = new ArrayList<>();
         
-        for (long time = getMinTime(); time < 86400 && newMessages.size() != 0 && ready.size() != 0 && scheduled.size() != 0; time += 1){
+
+        for (long time = getMinTime(); time < 864000 && (newMessages.size() != 0 || readyHigh.size() != 0 || readyModerate.size() != 0 || readyLow.size() != 0 || scheduled.size() != 0 || unavailableDrones.size() != 0); time += 1){
             for (int i = 0; i < newMessages.size(); i++){
                 if (newMessages.get(i).getTime().getTime() / 1000 <= time){
                     IncidentMessage temp = newMessages.remove(i);
                     int j = 0;
-                    while (j < ready.size() && ((temp.getSeverity() == Incident.Severity.LOW && (ready.get(j).getSeverity() == Incident.Severity.HIGH || ready.get(j).getSeverity() == Incident.Severity.MODERATE)) || (temp.getSeverity() == Incident.Severity.MODERATE && ready.get(j).getSeverity() == Incident.Severity.HIGH))) j++;
-                    while(j < ready.size() && (temp.getDistance() > ready.get(j).getDistance())) j++;
-                    ready.add(j, temp);
+                    switch (temp.getSeverity()){
+                        case HIGH:
+                            while(j < readyHigh.size() && (temp.getDistance() > readyHigh.get(j).getDistance())) j++;
+                            readyHigh.add(temp);
+                            break;
+                        case MODERATE:
+                            while(j < readyModerate.size() && (temp.getDistance() > readyModerate.get(j).getDistance())) j++;
+                            readyModerate.add(temp);
+                            break;
+                        case LOW:
+                            while(j < readyLow.size() && (temp.getDistance() > readyLow.get(j).getDistance())) j++;
+                            readyLow.add(temp);
+                            break;
+                    }
                 }
             }
 
@@ -68,15 +81,33 @@ public class Scheduler {
                 if (unavailableDrones.get(drone).getTime() / 1000 <= time){
                     availableDrones.add(drone);
                     unavailableDrones.remove(drone);
-                    System.out.println("Task completed.");
+                    System.out.println("\nTask completed at time: " + new Time(time * 1000 + 18000000));
                 }
             }
 
-            while (ready.size() != 0 && availableDrones.size() != 0){
-                scheduled.add(ready.remove(0));
-                unavailableDrones.put(availableDrones.remove(0), (Time) availableDrones.get(0).sendRequest(ready.get(0))); // RECEIVE TIME
+
+            while (readyHigh.size() != 0 && availableDrones.size() != 0){
+                scheduled.add(readyHigh.get(0));
+                Time temp = new Time((long)(time * 1000 + (double)availableDrones.get(0).sendRequest(readyHigh.remove(0))));
+                unavailableDrones.put(availableDrones.remove(0), temp);
+                System.out.println("Scheduler assigned incident: " + scheduled.get(scheduled.size() - 1).getType() + " at time: " + new Time(time * 1000 + 18000000));
+            }
+
+            while (readyModerate.size() != 0 && availableDrones.size() != 0){
+                scheduled.add(readyModerate.get(0));
+                Time temp = new Time((long)(time * 1000 + (double)availableDrones.get(0).sendRequest(readyModerate.remove(0))));
+                unavailableDrones.put(availableDrones.remove(0), temp);
+                System.out.println("Scheduler assigned incident: " + scheduled.get(scheduled.size() - 1).getType() + " at time: " + new Time(time * 1000 + 18000000));
+            }
+
+            while (readyLow.size() != 0 && availableDrones.size() != 0){
+                scheduled.add(readyLow.get(0));
+                Time temp = new Time((long)(time * 1000 + (double)availableDrones.get(0).sendRequest(readyLow.remove(0))));
+                unavailableDrones.put(availableDrones.remove(0), temp);
+                System.out.println("Scheduler assigned incident: " + scheduled.get(scheduled.size() - 1).getType() + " at time: " + new Time(time * 1000 + 18000000));
             }
         }
+        System.out.println("Scheduling finished.");
     }
 
     private long getMinTime(){
@@ -85,16 +116,5 @@ public class Scheduler {
             if (message.getTime().getTime() / 1000 < minTime) minTime = message.getTime().getTime() / 1000;
         }
         return minTime;
-    }
-
-    public void assignIncident(IncidentMessage incident) {
-        System.out.println("Scheduler assigned incident: " + incident.getType() + " at Zone " + incident.getStartX());
-        droneClient.sendRequest(incident); // Assign incident to Drone
-
-        // Wait for drone completion confirmation
-        Object droneAck = droneClient.sendRequest(true);
-        if (droneAck instanceof Boolean && (Boolean) droneAck) {
-            System.out.println("Scheduler marked incident as resolved.");
-        }
     }
 }
