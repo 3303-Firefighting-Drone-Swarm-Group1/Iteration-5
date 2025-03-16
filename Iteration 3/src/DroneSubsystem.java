@@ -1,18 +1,23 @@
 import static java.lang.Math.ceil;
 import static java.lang.Math.sqrt;
 
+import java.net.InetAddress;
+import java.sql.Time;
+
 /***
  * Drone subsystem with a state machine to manage firefighting operations.
  * @author ahmedbabar, modified by Abdulaziz Alsibakhi
  */
-public class DroneSubsystem implements Runnable {
-    private enum DroneState {
-        IDLE, EN_ROUTE, DROPPING_AGENT, RETURNING_TO_BASE
-    }
+public class DroneSubsystem {
+    private String schedulerHost;
+    private int schedulerPort;
+    private RPCClient schedulerClient;
+
+    private enum DroneState {IDLE, EN_ROUTE, DROPPING_AGENT, RETURNING_TO_BASE}
 
     private DroneState state;
-    private Scheduler scheduler;
     private IncidentMessage currentJobDetails;
+
 
     private final double SIZE_OF_TANK = 12;
     private double requiredLiquid;
@@ -24,36 +29,29 @@ public class DroneSubsystem implements Runnable {
     private double distance;
     private double numReturnTrips;
 
-    private Box sendBox, receiveBox;
-
-    public DroneSubsystem(Scheduler scheduler, Box sendBox, Box receiveBox) {
-        this.scheduler = scheduler;
-        this.sendBox = sendBox;
-        this.receiveBox = receiveBox;
+    public DroneSubsystem(String schedulerHost, int schedulerPort, int dronePort) {
         this.state = DroneState.IDLE;
+        new Thread(new RPCServer(dronePort, this)).start(); // Start DroneSubsystem's RPC server
+        this.schedulerClient = new RPCClient(schedulerHost, schedulerPort);
+        schedulerClient.sendRequest("join:" + dronePort);
     }
 
-    /***
-     * Runs the drone system, checking for jobs and executing them.
-     */
-    @Override
-    public void run() {
-        while (true) {
-            if (state == DroneState.IDLE) {
-                // Request a job
-                jobDetails();
-                if (currentJobDetails != null) {
-                    state = DroneState.EN_ROUTE;
-                    moveToFire();
-                    extinguishFire();
-                }
-            }
+    public Object handleRequest(Object request) {
+        if (request instanceof IncidentMessage) {
+            currentJobDetails = (IncidentMessage) request;
+            System.out.println("\nDrone received incident: " + currentJobDetails.getType());
+            processIncident(currentJobDetails);
+
+            return timeTaken * 1000; // Notify scheduler of job completion
         }
+        return null;
     }
 
-    private void moveToFire() {
-        System.out.println("Drone en route to fire at Zone " + currentJobDetails.getStartX());
-        state = DroneState.DROPPING_AGENT;
+    private void processIncident(IncidentMessage incident) {
+        state = DroneState.EN_ROUTE;
+        System.out.println("Drone en route to fire at X,Y " + (currentJobDetails.getStartX() + currentJobDetails.getEndX())/2 + "," + (currentJobDetails.getStartY() + currentJobDetails.getEndY())/2);
+
+        extinguishFire();
     }
 
     private void extinguishFire() {
@@ -76,26 +74,18 @@ public class DroneSubsystem implements Runnable {
                 requiredLiquid = 30;
                 break;
         }
-        numReturnTrips = ceil(requiredLiquid / SIZE_OF_TANK);
-    }
-
-    private void jobDetails() {
-        System.out.println("Drone requests job...");
-        currentJobDetails = (IncidentMessage) receiveBox.get();
+        numReturnTrips = Math.ceil(requiredLiquid / SIZE_OF_TANK);
     }
 
     private void notifyJobCompletion() {
-        System.out.println("Drone completed job. Notifying scheduler.");
-        sendBox.put(true);
     }
 
     private void returnToBase() {
-        System.out.println("Drone returning to base...");
         state = DroneState.IDLE;
     }
 
     private void droneCalculations() {
-        distance = sqrt((currentJobDetails.getEndX())^2 + (currentJobDetails.getEndY())^2);
+        distance = Math.sqrt(Math.pow(currentJobDetails.getEndX(), 2) + Math.pow(currentJobDetails.getEndY(), 2));
         timeTaken = 2 * (distance / speed) * numReturnTrips + openCloseNozzle + timeToEmptyTank * (requiredLiquid / SIZE_OF_TANK);
         System.out.println("Job severity: " + currentJobDetails.getSeverity());
         System.out.println("Job Completion Time: " + timeTaken);

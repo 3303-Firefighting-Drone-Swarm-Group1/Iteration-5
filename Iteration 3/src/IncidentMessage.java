@@ -4,17 +4,17 @@
  */
 
 import java.sql.Time;
-
+import java.io.Serializable;
 import java.awt.Point;
 
-public class IncidentMessage {
+public class IncidentMessage implements Serializable {
     private Incident.Severity severity;
     private Point start;
     private Point end;
     private Time time;
     private Incident.Type type;
 
-    public IncidentMessage(Incident.Severity severity, Point start, Point end, Time time, Incident.Type type){
+    public IncidentMessage(Incident.Severity severity, Point start, Point end, Time time, Incident.Type type) {
         this.severity = severity;
         this.start = start;
         this.end = end;
@@ -80,6 +80,10 @@ public class IncidentMessage {
         else closestY = getEndY();
 
         return new Point(closestX, closestY);
+    }
+
+    public double getDistance(){
+        return Point.distance((getStartX() + getEndX()) / 2, (getStartY() + getEndY()) / 2, 0, 0);
     }
 
     /**

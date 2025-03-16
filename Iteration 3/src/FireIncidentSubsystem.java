@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -9,24 +10,19 @@ import java.util.Scanner;
  * Reads input files containing zone and incident data.
  * @author Lucas Warburton, modified by Abdulaziz Alsibakhi
  */
-public class FireIncidentSubsystem implements Runnable {
-    private Scheduler scheduler;
-    private String zoneInput, eventInput;
-    private Box sendBox, receiveBox;
-    private int numCompleted;
 
-    public FireIncidentSubsystem(Scheduler scheduler, String zoneInput, String eventInput, Box sendBox, Box receiveBox) {
-        this.scheduler = scheduler;
+
+public class FireIncidentSubsystem implements Runnable {
+    private String zoneInput, eventInput;
+    private RPCClient schedulerClient;
+
+    public FireIncidentSubsystem(String zoneInput, String eventInput, String schedulerHost, int schedulerPort) {
         this.zoneInput = zoneInput;
         this.eventInput = eventInput;
-        this.sendBox = sendBox;
-        this.receiveBox = receiveBox;
-        numCompleted = 0;
+        this.schedulerClient = new RPCClient(schedulerHost, schedulerPort);
     }
 
-    /**
-     * Reads input files and transmits incidents to the scheduler.
-     */
+    @Override
     public void run() {
         HashMap<Integer, Zone> zones;
         try {
@@ -42,46 +38,41 @@ public class FireIncidentSubsystem implements Runnable {
             throw new RuntimeException("Incident file not found: " + e.getMessage());
         }
 
-        System.out.printf("There are %d incidents loaded.\n", incidents.size());
+        System.out.printf("\nThere are %d incidents loaded.\n", incidents.size());
+
+        ArrayList<IncidentMessage> messages = new ArrayList<>();
 
         for (Incident incident : incidents) {
-            sendBox.put(new IncidentMessage(incident.getSeverity(), zones.get(incident.getID()).getStart(),
-                    zones.get(incident.getID()).getEnd(), incident.getTime(), incident.getType()));
-            receiveBox.get(); // Wait for completion acknowledgment
-            System.out.println("Fire Incident Received Job Completion Token.");
-            numCompleted++;
+            IncidentMessage message = new IncidentMessage(incident.getSeverity(), zones.get(incident.getID()).getStart(),
+                    zones.get(incident.getID()).getEnd(), incident.getTime(), incident.getType());
+
+
+            messages.add(message);
+
         }
-        sendBox.put(null); // Signal end of input
+        System.out.println("FireIncidentSubsystem sent incident list.");
+        schedulerClient.sendRequest(messages);
     }
 
-    /**
-     * Reads the zone input file.
-     * @return a HashMap containing the information about each zone
-     */
     private HashMap<Integer, Zone> readZones() throws FileNotFoundException {
         Scanner sc = new Scanner(new File(zoneInput));
         HashMap<Integer, Zone> zones = new HashMap<>();
         sc.nextLine();
-        while (sc.hasNextLine()){
+        while (sc.hasNextLine()) {
             String[] line = sc.nextLine().trim().split(",");
             String[] start = line[1].split("();");
             String[] end = line[2].split("();");
             zones.put(
                     Integer.parseInt(line[0]),
                     new Zone(Integer.parseInt(start[0].substring(1)),
-                            Integer.parseInt(start[1].substring(0,1)),
+                            Integer.parseInt(start[1].substring(0, 1)),
                             Integer.parseInt(end[0].substring(1)),
-                            Integer.parseInt(end[1].substring(0, (end[1].length())-1))));
+                            Integer.parseInt(end[1].substring(0, (end[1].length()) - 1))));
         }
         sc.close();
         return zones;
     }
 
-
-    /**
-     * Reads incident data from the input file.
-     * @return ArrayList<Incident> containing incidents
-     */
     private ArrayList<Incident> readIncidents() throws FileNotFoundException {
         Scanner sc = new Scanner(new File(eventInput));
         ArrayList<Incident> incidents = new ArrayList<>();
@@ -106,19 +97,12 @@ public class FireIncidentSubsystem implements Runnable {
                     break;
             }
 
+            int zoneId = Integer.parseInt(line[1]); // Correctly parse Zone ID
             incidents.add(new Incident(
                     Integer.parseInt(time[0]), Integer.parseInt(time[1]), Integer.parseInt(time[2]),
-                    Integer.parseInt(line[1]), severity, type));
+                    zoneId, severity, type));
         }
         sc.close();
         return incidents;
-    }
-
-    /**
-     * Gets the number of incidents that were fully processed.
-     * @return Number of processed incidents.
-     */
-    public int getNumCompleted() {
-        return numCompleted;
     }
 }
