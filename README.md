@@ -5,10 +5,10 @@
 Iteration 3
 
 Contributions
-README.TXT - Marc
-UML Diagrams - Ahmed Babar
-Coding - Lucas Sam
-Testing - Abdul Aziz
+README.TXT - Marc <br/>
+UML Diagrams - Ahmed Babar<br/>
+Coding - Lucas Sam<br/>
+Testing - Abdul Aziz<br/>
 
 ## How to Run
 
