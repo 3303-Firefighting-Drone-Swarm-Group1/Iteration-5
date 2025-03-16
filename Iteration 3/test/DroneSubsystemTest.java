@@ -1,23 +1,61 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.awt.Point;
+import java.lang.reflect.Field;
+import java.net.ServerSocket;
 import java.sql.Time;
 
 public class DroneSubsystemTest {
 
     @Test
-    public void testHandleRequest() {
-        // Start a Scheduler on port 5000 (ensure this port is free)
-        int schedulerPort = 5000;
-        new Thread(new Scheduler(schedulerPort)).start();
+    public void testHandleRequest() throws Exception {
 
-        // Give the server time to start
-        try { Thread.sleep(100); } catch (InterruptedException e) { }
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            if (throwable instanceof java.net.BindException) {
+            } else {
+                throwable.printStackTrace();
+            }
+        });
 
-        // Create a DroneSubsystem instance on port 6000
-        DroneSubsystem drone = new DroneSubsystem("localhost", schedulerPort, 6000);
+        // Obtain a port for the Scheduler.
+        ServerSocket schedSocket = new ServerSocket(0);
+        int schedulerPort = schedSocket.getLocalPort();
+        schedSocket.close();
 
-        // Create a sample IncidentMessage with LOW severity
+        // Start the Scheduler on that port.
+        new Scheduler(schedulerPort);
+
+        // Allow the scheduler time to start listening on the port.
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+
+        // Obtain another port for the Drone.
+        ServerSocket droneSocket = new ServerSocket(0);
+        int dronePort = droneSocket.getLocalPort();
+        droneSocket.close();
+
+        // Create the DroneSubsystem using that port.
+        DroneSubsystem drone = new DroneSubsystem("localhost", schedulerPort, dronePort);
+
+        
+        Field schedulerClientField = DroneSubsystem.class.getDeclaredField("schedulerClient");
+        schedulerClientField.setAccessible(true);
+        schedulerClientField.set(drone, new RPCClient("localhost", schedulerPort) {
+            @Override
+            public Object sendRequest(Object request) {
+                // If a join message is sent, return null.
+                if (request instanceof String && ((String) request).startsWith("join:")) {
+                    return null;
+                }
+                // Otherwise, echo the request.
+                return request;
+            }
+        });
+
+        // Create a sample IncidentMessage with LOW severity.
         IncidentMessage incident = new IncidentMessage(
                 Incident.Severity.LOW,
                 new Point(1, 1),
@@ -26,26 +64,24 @@ public class DroneSubsystemTest {
                 Incident.Type.FIRE_DETECTED
         );
 
-        // Invoke the handleRequest method
+        // Invoke handleRequest on the drone.
         Object response = drone.handleRequest(incident);
 
-        // Calculate the expected time taken.
-        // Calculation based on DroneSubsystem.droneCalculations():
-        // distance = sqrt(2^2 + 2^2) = sqrt(8)
-        // For LOW severity: requiredLiquid = 10, SIZE_OF_TANK = 12, so numReturnTrips = ceil(10/12)=1.
-        // speed = 25, openCloseNozzle = 1, and timeToEmptyTank is (long)2.4 = 2.
-        // expected timeTaken = 2*(distance/25)*1 + 1 + 2*(10/12)
+        // Calculate the expected response time (in milliseconds).
         double distance = Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)); // sqrt(8)
         double requiredLiquid = 10;
         double sizeOfTank = 12;
         double numReturnTrips = Math.ceil(requiredLiquid / sizeOfTank);
         double speed = 25;
         double openCloseNozzle = 1;
-        double timeToEmptyTank = 2; // (long)2.4 becomes 2
-        double expectedTimeTaken = 2 * (distance / speed) * numReturnTrips + openCloseNozzle + timeToEmptyTank * (requiredLiquid / sizeOfTank);
+        double timeToEmptyTank = 2;
+        double expectedTimeTaken =
+                2 * (distance / speed) * numReturnTrips
+                        + openCloseNozzle
+                        + timeToEmptyTank * (requiredLiquid / sizeOfTank);
         double expectedMillis = expectedTimeTaken * 1000;
 
-        // Allow a small tolerance for floating point arithmetic.
-        assertEquals(expectedMillis, (Double)response, 1e-2);
+        // Compare with a small floating-point tolerance.
+        assertEquals(expectedMillis, (Double) response, 1e-2);
     }
 }

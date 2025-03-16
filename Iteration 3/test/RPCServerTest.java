@@ -8,22 +8,18 @@ public class RPCServerTest {
     @Test
     public void testRPCServerEcho() throws Exception {
         int testPort = 7002;
-        // Create a dummy DroneSubsystem that echoes requests.
-        DroneSubsystem dummyDrone = new DroneSubsystem("localhost", testPort, 8001) {
+        // Create a dummy Scheduler on testPort that echoes requests.
+        Scheduler dummyScheduler = new Scheduler(testPort) {
             @Override
             public Object handleRequest(Object request) {
                 return request;
             }
         };
 
-        // Start the RPCServer with the dummyDrone handler.
-        Thread serverThread = new Thread(new RPCServer(testPort, dummyDrone));
-        serverThread.start();
-
-        // Allow the server to start
+        // Allow time for the RPC server to start.
         try { Thread.sleep(100); } catch (InterruptedException e) { }
 
-        // Manually connect to the RPCServer via a Socket.
+        // Connect to the RPCServer running on testPort.
         Socket socket = new Socket("localhost", testPort);
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -32,10 +28,8 @@ public class RPCServerTest {
         out.writeObject(message);
         out.flush();
         Object response = in.readObject();
-
         assertEquals(message, response);
 
         socket.close();
-        serverThread.interrupt();
     }
 }
