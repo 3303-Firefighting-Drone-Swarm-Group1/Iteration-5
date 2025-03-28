@@ -29,6 +29,8 @@ public class DroneSubsystem {
     private double distance;
     private double numReturnTrips;
 
+    private boolean sendPacket = true;
+
     public DroneSubsystem(String schedulerHost, int schedulerPort, int dronePort) {
         this.state = DroneState.IDLE;
         new Thread(new RPCServer(dronePort, this)).start(); // Start DroneSubsystem's RPC server
@@ -53,13 +55,15 @@ public class DroneSubsystem {
 
         switch (incident.getFault()) {
             case PACKET_LOSS:
-
+                sendPacket = false;
                 break;
             case DRONE_STUCK:
-
+                System.out.println("Drone on port " + schedulerPort + "'s bay doors are stuck, shutting down drone.");
+                // Able to send message to scheduler if necessary.
                 return;
             case NOZZLE_JAMMED:
-
+                System.out.println("Drone on port " + schedulerPort + "'s nozzles are jammed, shutting down drone.");
+                // Able to send message to scheduler if necessary.
                 return;
             default:
                 break;
@@ -92,6 +96,8 @@ public class DroneSubsystem {
     }
 
     private void notifyJobCompletion() {
+        if (sendPacket) 
+            schedulerClient.sendRequest("completed:" + schedulerPort);
     }
 
     private void returnToBase() {
