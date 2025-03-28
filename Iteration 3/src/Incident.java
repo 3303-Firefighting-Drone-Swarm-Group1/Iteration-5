@@ -18,16 +18,25 @@ public class Incident implements Serializable {
         DRONE_REQUEST
     }
 
+    public enum Fault implements Serializable {
+        NONE,
+        DRONE_STUCK,
+        NOZZLE_JAMMED,
+        PACKET_LOSS
+    }
+
     private Time time;
     private int id;
     private Severity severity;
+    private Fault fault;
     private Type type;
 
-    public Incident(int hour, int minute, int second, int id, Severity severity, Type type) {
+    public Incident(int hour, int minute, int second, int id, Severity severity, Type type, Fault fault) {
         this.time = new Time(((hour * 60 + minute) * 60 + second) * 1000);
         this.id = id;
         this.severity = severity;
         this.type = type;
+        this.fault = fault;
     }
 
     /**
@@ -60,5 +69,14 @@ public class Incident implements Serializable {
      */
     public Type getType(){
         return type;
+    }
+
+    /**
+     * Gets the fault that will occur on the
+     * drone that is tasked with this incident.
+     * @return the fault
+     */
+    public Fault getFault() {
+        return fault;
     }
 }

@@ -13,13 +13,15 @@ public class IncidentMessage implements Serializable {
     private Point end;
     private Time time;
     private Incident.Type type;
+    private Incident.Fault fault;
 
-    public IncidentMessage(Incident.Severity severity, Point start, Point end, Time time, Incident.Type type) {
+    public IncidentMessage(Incident.Severity severity, Point start, Point end, Time time, Incident.Type type, Incident.Fault fault) {
         this.severity = severity;
         this.start = start;
         this.end = end;
         this.time = time;
         this.type = type;
+        this.fault = fault;
     }
 
     /**
@@ -100,6 +102,15 @@ public class IncidentMessage implements Serializable {
      */
     public Incident.Type getType(){
         return type;
+    }
+
+    /**
+     * Gets the fault that will occur on the
+     * drone that is tasked with this incident.
+     * @return the fault
+     */
+    public Incident.Fault getFault() {
+        return fault;
     }
 
 }

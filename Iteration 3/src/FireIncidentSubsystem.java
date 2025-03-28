@@ -44,7 +44,7 @@ public class FireIncidentSubsystem implements Runnable {
 
         for (Incident incident : incidents) {
             IncidentMessage message = new IncidentMessage(incident.getSeverity(), zones.get(incident.getID()).getStart(),
-                    zones.get(incident.getID()).getEnd(), incident.getTime(), incident.getType());
+                    zones.get(incident.getID()).getEnd(), incident.getTime(), incident.getType(), incident.getFault());
 
 
             messages.add(message);
@@ -97,10 +97,26 @@ public class FireIncidentSubsystem implements Runnable {
                     break;
             }
 
+            Incident.Fault fault;
+            switch (line[5]) {
+                case "DRONE_STUCK":
+                    fault = Incident.Fault.DRONE_STUCK;
+                    break;
+                case "NOZZLE_JAMMED":
+                    fault = Incident.Fault.NOZZLE_JAMMED;
+                    break;
+                case "PACKET_LOSS":
+                    fault = Incident.Fault.PACKET_LOSS;
+                    break;
+                default:
+                    fault = Incident.Fault.NONE;
+                    break;
+            }
+
             int zoneId = Integer.parseInt(line[1]); // Correctly parse Zone ID
             incidents.add(new Incident(
                     Integer.parseInt(time[0]), Integer.parseInt(time[1]), Integer.parseInt(time[2]),
-                    zoneId, severity, type));
+                    zoneId, severity, type, fault));
         }
         sc.close();
         return incidents;

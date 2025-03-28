@@ -51,6 +51,20 @@ public class DroneSubsystem {
         state = DroneState.EN_ROUTE;
         System.out.println("Drone en route to fire at X,Y " + (currentJobDetails.getStartX() + currentJobDetails.getEndX())/2 + "," + (currentJobDetails.getStartY() + currentJobDetails.getEndY())/2);
 
+        switch (incident.getFault()) {
+            case PACKET_LOSS:
+
+                break;
+            case DRONE_STUCK:
+
+                return;
+            case NOZZLE_JAMMED:
+
+                return;
+            default:
+                break;
+        }
+
         extinguishFire();
     }
 
