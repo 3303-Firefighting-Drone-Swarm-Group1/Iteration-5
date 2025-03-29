@@ -26,6 +26,7 @@ Updated Class Diagram to reflect new fault handling components <br/>
 
 Related Diagrams: <br/>
 Class Diagram of all interacting systems <br/>
-![Class Diagram](Iteration 3/diagrams/SYSC_3303_Iteration_3_ClassDiagram.png)
-<br/> UML Sequence Diagram <br/>
-![Sequence Diagram](Iteration 3/diagrams/SYSC_3303_Assignment_2_UML_Sequence.PNG)
+![Class Diagram](Iteration 4/diagrams/SYSC3303_Iteration4_Class.png)
+<br/> Timing Diagram <br/>
+![Sequence Diagram](Iteration 4/diagrams/SYSC3303_Iteration4_Timing1.png) <br/>
+![Sequence Diagram](Iteration 4/diagrams/SYSC3303_Iteration4_Timing2.png)
