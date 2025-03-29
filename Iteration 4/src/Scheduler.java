@@ -10,12 +10,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * the faulty drone is removed and the incident is requeued.
  */
 public class Scheduler {
-    private Queue<IncidentMessage> incidentQueue;
     private ArrayList<IncidentMessage> newMessages;
     private ArrayList<RPCClient> availableDrones;
 
     public Scheduler(int schedulerPort) {
-        this.incidentQueue = new LinkedList<>();
         availableDrones = new ArrayList<>();
         new Thread(new RPCServer(schedulerPort, this)).start(); // Start Scheduler's RPC server
     }
