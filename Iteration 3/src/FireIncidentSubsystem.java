@@ -98,7 +98,7 @@ public class FireIncidentSubsystem implements Runnable {
             }
 
             Incident.Fault fault;
-            switch (line[5]) {
+            switch (line[4]) {
                 case "DRONE_STUCK":
                     fault = Incident.Fault.DRONE_STUCK;
                     break;

@@ -1,23 +1,21 @@
 import static java.lang.Math.ceil;
+import static java.lang.Math.incrementExact;
 import static java.lang.Math.sqrt;
-
-import java.net.InetAddress;
 import java.sql.Time;
 
 /***
  * Drone subsystem with a state machine to manage firefighting operations.
- * @author ahmedbabar, modified by Abdulaziz Alsibakhi
+ * Fault handling added for iteration 4 with detailed output.
  */
 public class DroneSubsystem {
     private String schedulerHost;
     private int schedulerPort;
     private RPCClient schedulerClient;
+    private int dronePort; // Identifier for this drone
 
-    private enum DroneState {IDLE, EN_ROUTE, DROPPING_AGENT, RETURNING_TO_BASE}
-
+    private enum DroneState {IDLE, EN_ROUTE, DROPPING_AGENT, RETURNING_TO_BASE, FAULTED}
     private DroneState state;
     private IncidentMessage currentJobDetails;
-
 
     private final double SIZE_OF_TANK = 12;
     private double requiredLiquid;
@@ -32,6 +30,9 @@ public class DroneSubsystem {
     private boolean sendPacket = true;
 
     public DroneSubsystem(String schedulerHost, int schedulerPort, int dronePort) {
+        this.schedulerHost = schedulerHost;
+        this.schedulerPort = schedulerPort;
+        this.dronePort = dronePort; // store drone port
         this.state = DroneState.IDLE;
         new Thread(new RPCServer(dronePort, this)).start(); // Start DroneSubsystem's RPC server
         this.schedulerClient = new RPCClient(schedulerHost, schedulerPort);
@@ -41,35 +42,46 @@ public class DroneSubsystem {
     public Object handleRequest(Object request) {
         if (request instanceof IncidentMessage) {
             currentJobDetails = (IncidentMessage) request;
-            System.out.println("\nDrone received incident: " + currentJobDetails.getType());
-            processIncident(currentJobDetails);
-
-            return timeTaken * 1000; // Notify scheduler of job completion
+            System.out.println("\nDrone on port " + dronePort + " received incident: " + currentJobDetails.getType());
+            double responseTime = processIncident(currentJobDetails);
+            return responseTime;
         }
         return null;
     }
 
-    private void processIncident(IncidentMessage incident) {
+    private double processIncident(IncidentMessage incident) {
         state = DroneState.EN_ROUTE;
-        System.out.println("Drone en route to fire at X,Y " + (currentJobDetails.getStartX() + currentJobDetails.getEndX())/2 + "," + (currentJobDetails.getStartY() + currentJobDetails.getEndY())/2);
+        int avgX = (currentJobDetails.getStartX() + currentJobDetails.getEndX()) / 2;
+        int avgY = (currentJobDetails.getStartY() + currentJobDetails.getEndY()) / 2;
+        System.out.println("Drone on port " + dronePort + " en route to fire at X,Y " + avgX + "," + avgY);
 
+        // Process fault conditions
+        System.out.println(incident.getFault().toString());
+        extinguishFire();
         switch (incident.getFault()) {
-            case PACKET_LOSS:
-                sendPacket = false;
-                break;
             case DRONE_STUCK:
-                System.out.println("Drone on port " + schedulerPort + "'s bay doors are stuck, shutting down drone.");
-                // Able to send message to scheduler if necessary.
-                return;
+                System.out.println("Drone on port " + dronePort + "'s bay doors are stuck, shutting down drone.");
+                //schedulerClient.sendRequest("fault:" + dronePort + ":DRONE_STUCK");
+                state = DroneState.FAULTED;
+                timeTaken = -(distance / speed) * numReturnTrips;
+                break;
             case NOZZLE_JAMMED:
-                System.out.println("Drone on port " + schedulerPort + "'s nozzles are jammed, shutting down drone.");
-                // Able to send message to scheduler if necessary.
-                return;
-            default:
+                System.out.println("Drone on port " + dronePort + "'s nozzles are jammed, shutting down drone.");
+                //schedulerClient.sendRequest("fault:" + dronePort + ":NOZZLE_JAMMED");
+                state = DroneState.FAULTED;
+                timeTaken = -(distance / speed) * numReturnTrips;
+                break;
+            case PACKET_LOSS:
+                System.out.println("Due to PACKET_LOSS, no completion packet was sent. Scheduler will eventually reassign this incident.");
+                sendPacket = false;
+                timeTaken = -(distance / speed) * numReturnTrips;
+                break;
+            case NONE:
+                // No fault; continue normally.
                 break;
         }
 
-        extinguishFire();
+        return timeTaken * 1000; // Return job completion time in milliseconds.
     }
 
     private void extinguishFire() {
@@ -96,8 +108,6 @@ public class DroneSubsystem {
     }
 
     private void notifyJobCompletion() {
-        if (sendPacket) 
-            schedulerClient.sendRequest("completed:" + schedulerPort);
     }
 
     private void returnToBase() {
@@ -106,7 +116,8 @@ public class DroneSubsystem {
 
     private void droneCalculations() {
         distance = Math.sqrt(Math.pow(currentJobDetails.getEndX(), 2) + Math.pow(currentJobDetails.getEndY(), 2));
-        timeTaken = 2 * (distance / speed) * numReturnTrips + openCloseNozzle + timeToEmptyTank * (requiredLiquid / SIZE_OF_TANK);
+        timeTaken = 2 * (distance / speed) * numReturnTrips + openCloseNozzle +
+                timeToEmptyTank * (requiredLiquid / SIZE_OF_TANK);
         System.out.println("Job severity: " + currentJobDetails.getSeverity());
         System.out.println("Job Completion Time: " + timeTaken);
     }

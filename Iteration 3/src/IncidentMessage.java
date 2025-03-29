@@ -113,5 +113,9 @@ public class IncidentMessage implements Serializable {
         return fault;
     }
 
+    public void clearFault() {
+        this.fault = Incident.Fault.NONE;
+    }
+
 }
 
