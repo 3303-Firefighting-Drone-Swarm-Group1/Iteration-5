@@ -61,7 +61,38 @@ public class DroneSubsystemTest {
                 new Point(1, 1),
                 new Point(2, 2),
                 new Time(((5 * 60 + 5) * 60 + 5) * 1000),
-                Incident.Type.FIRE_DETECTED
+                Incident.Type.FIRE_DETECTED,
+                Incident.Fault.NONE
+        );
+
+        // Create a sample IncidentMessage with LOW severity.
+        IncidentMessage fault1 = new IncidentMessage(
+                Incident.Severity.LOW,
+                new Point(1, 1),
+                new Point(2, 2),
+                new Time(((5 * 60 + 5) * 60 + 5) * 1000),
+                Incident.Type.FIRE_DETECTED,
+                Incident.Fault.DRONE_STUCK
+        );
+
+        // Create a sample IncidentMessage with LOW severity.
+        IncidentMessage fault2 = new IncidentMessage(
+                Incident.Severity.LOW,
+                new Point(1, 1),
+                new Point(2, 2),
+                new Time(((5 * 60 + 5) * 60 + 5) * 1000),
+                Incident.Type.FIRE_DETECTED,
+                Incident.Fault.NOZZLE_JAMMED
+        );
+
+        // Create a sample IncidentMessage with LOW severity.
+        IncidentMessage fault3 = new IncidentMessage(
+                Incident.Severity.LOW,
+                new Point(1, 1),
+                new Point(2, 2),
+                new Time(((5 * 60 + 5) * 60 + 5) * 1000),
+                Incident.Type.FIRE_DETECTED,
+                Incident.Fault.PACKET_LOSS
         );
 
         // Invoke handleRequest on the drone.
@@ -83,5 +114,10 @@ public class DroneSubsystemTest {
 
         // Compare with a small floating-point tolerance.
         assertEquals(expectedMillis, (Double) response, 1e-2);
+
+        //Checking if fault Detected, it should return a negative time.
+        assertTrue(0 > drone.processIncident(fault1));
+        assertTrue(0 > drone.processIncident(fault2));
+        assertTrue(0 > drone.processIncident(fault3));
     }
 }

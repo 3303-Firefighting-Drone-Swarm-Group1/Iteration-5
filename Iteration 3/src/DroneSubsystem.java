@@ -49,7 +49,7 @@ public class DroneSubsystem {
         return null;
     }
 
-    private double processIncident(IncidentMessage incident) {
+    public double processIncident(IncidentMessage incident) {
         state = DroneState.EN_ROUTE;
         int avgX = (currentJobDetails.getStartX() + currentJobDetails.getEndX()) / 2;
         int avgY = (currentJobDetails.getStartY() + currentJobDetails.getEndY()) / 2;
