@@ -1,30 +1,29 @@
-# Iteration-3
-
-### Contributions in this Iteration
-# iteration-3
-Iteration 3
+Iteration-4
 
 Contributions
-README.TXT - Marc <br/>
-UML Diagrams - Ahmed Babar<br/>
-Coding - Lucas Sam<br/>
-Testing - Abdul Aziz<br/>
+README.TXT - Sam <br/>
+UML Diagrams - Lucas <br/>
+Coding - Lucas Abdulaziz Marc <br/>
+Testing - Ahmed <br/>
 
-## How to Run
+How to Run
+Download file using .zip on Github. Extract project.
+Run the Main.java File.
+How to Run Tests
+*Requires JUnit
+(Tests for Iteration 4) Run the DroneSubsystemTest, IncidentMessageTest and IncidentTest. If they pass then Faults are detected and handled.
 
-1. Download file using .zip on Github. Extract project.
-2. Run the Main.java File.
+Changes implemented in Fourth Iteration
+Addition of fault detection using timing events
+Detection of zone arrival failures and stuck nozzle/bay doors
+Hard fault handling for nozzle/bay door issues (drone shutdown)
+Input file format updated to support fault injection
+System updated to log and display drone faults in status output
+Testing of fault detection and system recovery logic
+Updated Class Diagram to reflect new fault handling components
 
-## Changes implemented in Third Iteration
-Will be explained by group members. 
-- Use of RPCClient/Server architecture
-- Scheduling of Multiple Drones
-- Testing of newly implemented systems
-- Updated Class Diagram
-
-## Related Diagrams:
-
-### Class Diagram of all interacting systems
+Related Diagrams:
+Class Diagram of all interacting systems
 ![Class Diagram](Iteration 3/diagrams/SYSC_3303_Iteration_3_ClassDiagram.png)
-### UML Sequence Diagram
+UML Sequence Diagram
 ![Sequence Diagram](Iteration 3/diagrams/SYSC_3303_Assignment_2_UML_Sequence.PNG)
