@@ -232,8 +232,8 @@ public class Scheduler {
             }
 
             // Increment time for simulation.
+            map.updatePositions(time);
             time++;
-            if (time % 60 == 0) map.updatePositions(time);
         }
         System.out.println("Scheduling finished.");
     }
