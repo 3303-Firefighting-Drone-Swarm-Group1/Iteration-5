@@ -77,7 +77,8 @@ public class Scheduler {
         ConcurrentHashMap<Drone, Fire> scheduled = new ConcurrentHashMap<>();
 
         // For simulation, use a simple time counter.
-        long time = getMinTime();
+        long minTime = getMinTime();
+        long time = minTime;
         while (!newMessages.isEmpty() || !readyHigh.isEmpty() || !readyModerate.isEmpty() || !readyLow.isEmpty() || !enRoute.isEmpty() || !droppingAgent.isEmpty() || !returning.isEmpty() || !transientFaulted.isEmpty()) {
 
             //check for newly active fires
@@ -336,11 +337,16 @@ public class Scheduler {
             }
 
             // Increment time for simulation.
-            map.updatePositions(time);
+            map.updatePositions();
             notifyController();
-            time++;
+            time+= 1000;
+            try {
+                Thread.sleep(10);
+            } catch (Exception e) {}
         }
-        System.out.println("Scheduling finished.");
+
+        System.out.println("=== Simulation Summary ===");
+        System.out.println("Total time to extinguish all fires: " + (time - minTime) / 60000 + " minutes");
     }
 
     private long getMinTime() {

@@ -14,6 +14,7 @@ public class DroneSubsystem {
     private long timeToEmptyTank = (long) 2400; // 2400 ms
     private long openCloseNozzle = 1000;
     private double speed = 0.025; // 25 m/ms
+    private double totalDistance = 0;
 
     public DroneSubsystem(String schedulerHost, int schedulerPort, int dronePort) {
         this.dronePort = dronePort; // store drone port
@@ -63,18 +64,25 @@ public class DroneSubsystem {
                 return -69;
             default:
                 state = DroneState.DROPPING_AGENT;
-                return (long) (timeToEmptyTank * incident.getWater() / SIZE_OF_TANK + openCloseNozzle);
+                long responseTime = (long) (timeToEmptyTank * incident.getWater() / SIZE_OF_TANK + openCloseNozzle);
+                System.out.println("Fire extinguished in " + responseTime + "ms");
+                return responseTime;
         }
     }
 
     private long droppingAgent(TaskMessage incident){
         double distance = Math.sqrt(Math.pow(incident.getFireLocation().getX(), 2) + Math.pow(incident.getFireLocation().getY(), 2));
         state = DroneState.RETURNING_TO_BASE;
+        totalDistance += distance;
         return (long) (distance / speed);
     }
 
     private long idle(TaskMessage incident){
         double distance = Math.sqrt(Math.pow(incident.getFireLocation().getX(), 2) + Math.pow(incident.getFireLocation().getY(), 2));
+        System.out.println("Drone " + dronePort + " responding to fire at zone " +
+                incident.getFireLocation().getX() + "," + incident.getFireLocation().getY() +
+                " (distance: " + String.format("%.2f", distance) + ")");
+        totalDistance += distance;
         state = DroneState.EN_ROUTE;
         return (long) (distance / speed);
     }
@@ -86,7 +94,12 @@ public class DroneSubsystem {
 
     private long faulted(TaskMessage incident){
         double distance = Math.sqrt(Math.pow(incident.getFireLocation().getX(), 2) + Math.pow(incident.getFireLocation().getY(), 2));
+        totalDistance += distance;
         state = DroneState.RETURNING_TO_BASE;
         return (long) (distance / speed);
+    }
+
+    public double getTotalDistance() {
+        return totalDistance;
     }
 }
