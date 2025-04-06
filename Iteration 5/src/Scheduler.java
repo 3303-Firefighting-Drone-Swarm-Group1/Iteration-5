@@ -15,7 +15,7 @@ public class Scheduler {
     private Map map;
 
     //Subscribed Classes
-    private final ViewController viewController;
+    private ViewController viewController;
     //Tells GUI to reflect changes
     public void notifyController() {
         if (viewController != null) {
@@ -107,11 +107,7 @@ public class Scheduler {
                     }
                     notifyController();
                     System.out.println("Fire exists at: " + new Time(time + 18000000));
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
                 }
             }
 
@@ -362,5 +358,9 @@ public class Scheduler {
 
     public Map getMap() {
         return map;
+    }
+
+    public void setViewController(ViewController viewController) {
+        this.viewController = viewController;
     }
 }

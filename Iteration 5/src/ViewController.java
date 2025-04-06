@@ -28,8 +28,9 @@ public class ViewController implements ActionListener {
     public void initialize() {
         this.availableZones = getZoneData();
         this.fireList = getFireIncidents();
+        //System.out.println("Current Fires"+ fireList.size());
         this.droneList = getDrones();
-        Timer timer = new Timer(150, this);
+        Timer timer = new Timer(100, this);
         timer.start();
     }
 
@@ -38,7 +39,6 @@ public class ViewController implements ActionListener {
         //Recall Drones method to add new drones and location
         updateFires();
         updateDrones();
-        //updateGUI
     }
 
 
@@ -48,7 +48,10 @@ public class ViewController implements ActionListener {
     }
 
     public ArrayList<Fire> getFireIncidents() {
+        ArrayList<Fire> temp = this.scheduler.getMap().getFires();
+        //System.out.println("FROM SCHEDULER" + temp.size());
         return scheduler.getMap().getFires();
+
     }
 
     public ArrayList<Drone> getDrones() {
@@ -65,6 +68,7 @@ public class ViewController implements ActionListener {
                 firesToRemove.add(fire);
             }
         }
+
         fireList.removeAll(firesToRemove);
         fireList.clear();
         fireList.addAll(currentFires);
@@ -85,17 +89,19 @@ public class ViewController implements ActionListener {
 //        private FireIncidentSubsystem fireIncidentSubsystem;
 
         Scheduler scheduler1 = new Scheduler(SCHEDULER_PORT);
+
         FireIncidentSubsystem fireSystem = new FireIncidentSubsystem(
                 "Iteration 5/input/sample_zone_file.csv", "Iteration 5/input/Sample_event_file.csv",
                 SCHEDULER_HOST,
                 SCHEDULER_PORT
         );
 
-        //new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6000);
+        new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6000);
         //new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6001);
         new Thread(fireSystem).start();
 
         ViewController viewController = new ViewController(scheduler1, fireSystem);
+        scheduler1.setViewController(viewController);
         EventUI eventUI = new EventUI(viewController);
     }
 

@@ -57,11 +57,6 @@ public class EventUI extends JFrame implements ActionListener {
     public void updateMap() {
         map.updateData(viewController.fireList, viewController.droneList, viewController.extinguishedFireList);
         map.repaint();
-
-        //        int farthest_point = 600;
-//        int numberZones = 5;
-//        guiDrawing drawing = new guiDrawing(zones);
-//        map = drawing;
     }
 
     @Override
@@ -88,6 +83,9 @@ public class EventUI extends JFrame implements ActionListener {
     }
 }
 
+/***
+ * Draws Map of Zones, then ontop the Fires occuring then the drones moves in their positions.
+ */
 class guiDrawing extends JPanel {
     public HashMap<Integer, Zone> zones = new HashMap<>();
     private ArrayList<Fire> fires;
@@ -114,7 +112,7 @@ class guiDrawing extends JPanel {
 
         //Graphics2D g2d = (Graphics2D) g;
         int[] coordinates;
-        int x = 0;
+        int x = 1;
         for (Zone zone: zones.values()) {
             g.setColor(Color.black);
             coordinates = zone.getCoordinatesAsInt();
@@ -127,14 +125,17 @@ class guiDrawing extends JPanel {
             g.setColor(Color.BLACK);
             g.drawString(temp, coordinates[0] + 20, coordinates[1] + 20);
         }
+
+        //System.out.println("Working: "+ fires.size() + extinguishedFires.size());
+
         for (Fire fire: fires) {
-            if (extinguishedFires.contains(fire)) {
-                g.setColor(Color.GREEN);
-            } else {
+            //if (extinguishedFires.contains(fire)) {
+                //g.setColor(Color.GREEN);
+            //} else {
                 g.setColor(Color.ORANGE);
-            }
-            g.fillRect((int)(fire.getX() - 5), (int)(fire.getY() - 5), 10, 10);
-            System.out.println("Fire: " + fire.getDistance());
+            //}
+            g.fillRect((int)(fire.getX() - 10), (int)(fire.getY() - 10), 20, 20);
+            System.out.println("Fire:" + fire.getX());
         }
 
         for (Drone drone: drones) {
@@ -146,10 +147,8 @@ class guiDrawing extends JPanel {
                 g.setColor(Color.BLUE);
             }
             g.fillRect((int)(drone.getX() - 5), (int)(drone.getY() - 5), 10, 10);
-            String temp = drone.getState().toString();
+            String temp = "Drone";
             g.drawString(temp, (int)(drone.getX() + 10), (int)(drone.getX() + 10));
         }
-        //System.out.println("zone size: " + zones.size());
-        //g2d.dispose();
     }
 }
