@@ -2,11 +2,10 @@
 <module version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$/Iteration 3">
-      <sourceFolder url="file://$MODULE_DIR$/Iteration 3/diagrams" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/Iteration 3/input" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/Iteration 3/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Iteration 3/test" isTestSource="true" />
+    <content url="file://$MODULE_DIR$/Iteration 5">
+      <sourceFolder url="file://$MODULE_DIR$/Iteration 5/input" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/Iteration 5/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Iteration 5/test" isTestSource="true" />
     </content>
     <orderEntry type="jdk" jdkName="openjdk-23" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />

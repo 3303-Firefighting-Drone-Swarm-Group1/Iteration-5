@@ -1,3 +1,4 @@
+import java.awt.event.ActionEvent;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,11 +13,29 @@ public class Scheduler {
     private ArrayList<Drone> idle;
     private Map map;
 
-    public Scheduler(int schedulerPort) {
+    //Subscribed Classes
+    private final ViewController viewController;
+    //Tells GUI to reflect changes
+    public void notifyController() {
+        if (viewController != null) {
+            viewController.update();
+        }
+    }
+
+    public Scheduler(int schedulerPort, ViewController viewController) {
+        this.viewController = viewController;
         idle = new ArrayList<>();
         new Thread(new RPCServer(schedulerPort, this)).start(); // Start Scheduler's RPC server
         map = new Map();
     }
+
+    public Scheduler(int schedulerPort) {
+        this.viewController = null;
+        idle = new ArrayList<>();
+        new Thread(new RPCServer(schedulerPort, this)).start(); // Start Scheduler's RPC server
+        map = new Map();
+    }
+
     public Object handleRequest(Object request) {
         if (request instanceof ArrayList<?>) {
             newMessages = (ArrayList<IncidentMessage>) request;
@@ -39,7 +58,8 @@ public class Scheduler {
         return null;
     }
 
-    private void schedule() {
+    private void schedule()
+    {
         //fires
         ArrayList<Fire> readyHigh = new ArrayList<>();
         ArrayList<Fire> readyModerate = new ArrayList<>();
@@ -84,7 +104,13 @@ public class Scheduler {
                             map.addFire(f3);
                             break;
                     }
+                    notifyController();
                     System.out.println("Fire exists at: " + new Time(time + 18000000));
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -233,6 +259,7 @@ public class Scheduler {
 
             // Increment time for simulation.
             map.updatePositions(time);
+            notifyController();
             time++;
         }
         System.out.println("Scheduling finished.");
@@ -253,5 +280,9 @@ public class Scheduler {
 
     private TaskMessage makeTaskMessage(Drone drone){
         return new TaskMessage(0, new Point(drone.getX(), drone.getY()), new Point(drone.getX(), drone.getY()), null);
+    }
+
+    public Map getMap() {
+        return map;
     }
 }

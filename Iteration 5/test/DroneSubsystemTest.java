@@ -1,6 +1,6 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
-import java.awt.Point;
+
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.sql.Time;
@@ -60,7 +60,7 @@ public class DroneSubsystemTest {
                 Incident.Severity.LOW,
                 new Point(1, 1),
                 new Point(2, 2),
-                new Time(((5 * 60 + 5) * 60 + 5) * 1000),
+                new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
                 Incident.Type.FIRE_DETECTED,
                 Incident.Fault.NONE
         );
@@ -70,7 +70,7 @@ public class DroneSubsystemTest {
                 Incident.Severity.LOW,
                 new Point(1, 1),
                 new Point(2, 2),
-                new Time(((5 * 60 + 5) * 60 + 5) * 1000),
+                new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
                 Incident.Type.FIRE_DETECTED,
                 Incident.Fault.DRONE_STUCK
         );
@@ -80,7 +80,7 @@ public class DroneSubsystemTest {
                 Incident.Severity.LOW,
                 new Point(1, 1),
                 new Point(2, 2),
-                new Time(((5 * 60 + 5) * 60 + 5) * 1000),
+                new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
                 Incident.Type.FIRE_DETECTED,
                 Incident.Fault.NOZZLE_JAMMED
         );
@@ -90,7 +90,7 @@ public class DroneSubsystemTest {
                 Incident.Severity.LOW,
                 new Point(1, 1),
                 new Point(2, 2),
-                new Time(((5 * 60 + 5) * 60 + 5) * 1000),
+                new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
                 Incident.Type.FIRE_DETECTED,
                 Incident.Fault.PACKET_LOSS
         );

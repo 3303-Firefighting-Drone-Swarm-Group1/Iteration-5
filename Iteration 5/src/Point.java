@@ -4,6 +4,7 @@ public class Point implements Serializable{
     private double x;
     private double y;
 
+
     public Point(double x, double y){
         this.x = x;
         this.y = y;
@@ -13,7 +14,17 @@ public class Point implements Serializable{
         return x;
     }
 
+
+
+
     public double getY(){
+        //System.out.println("Point x: " + x + " y: " + y);
+        return y;
+    }
+
+
+    public int getIntY() {
+        int y = (int) this.y;
         return y;
     }
 

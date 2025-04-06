@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class FireIncidentSubsystem implements Runnable {
     private String zoneInput, eventInput;
     private RPCClient schedulerClient;
+    public HashMap<Integer, Zone> zones;
 
     public FireIncidentSubsystem(String zoneInput, String eventInput, String schedulerHost, int schedulerPort) {
         this.zoneInput = zoneInput;
@@ -29,7 +30,7 @@ public class FireIncidentSubsystem implements Runnable {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Zone file not found: " + e.getMessage());
         }
-
+        this.zones = zones;
         ArrayList<Incident> incidents;
         try {
             incidents = readIncidents();
@@ -61,15 +62,32 @@ public class FireIncidentSubsystem implements Runnable {
             String[] line = sc.nextLine().trim().split(",");
             String[] start = line[1].split("();");
             String[] end = line[2].split("();");
+            String startx = start[0].replace("(", "");
+            String starty = start[1].replace(")", "");
+            String endx = end[0].replace("(", "");
+            String endy = end[1].replace(")", "");
+            //System.out.println(line[0] +
+            //        " " + startx + " " + starty + " " + endx + " " + endy);
             zones.put(
                     Integer.parseInt(line[0]),
-                    new Zone(Integer.parseInt(start[0].substring(1)),
-                            Integer.parseInt(start[1].substring(0, 1)),
-                            Integer.parseInt(end[0].substring(1)),
-                            Integer.parseInt(end[1].substring(0, (end[1].length()) - 1))));
+                    new Zone(Integer.parseInt(startx),
+                            Integer.parseInt(starty),
+                            Integer.parseInt(endx),
+                            Integer.parseInt(endy)));
+//            System.out.println(
+//                      "First Value: " + Integer.parseInt(start[0].substring(1))
+//                    + " Second Value: " + Integer.parseInt(start[1].substring(0, 2))
+//                    + " Third Value: " +  Integer.parseInt(end[0].substring(1))
+//                    + " Fourth Value: " + Integer.parseInt(end[1].substring(0, (end[1].length()) - 1)));
         }
         sc.close();
         return zones;
+    }
+
+    public void printZones() {
+        for (Zone zone : zones.values()) {
+            System.out.println(zone);
+        }
     }
 
     private ArrayList<Incident> readIncidents() throws FileNotFoundException {
