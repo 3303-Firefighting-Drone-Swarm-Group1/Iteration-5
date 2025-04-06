@@ -81,6 +81,8 @@ public class ViewController implements ActionListener {
 
 
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+
 //        private Scheduler scheduler;
 //        private FireIncidentSubsystem fireIncidentSubsystem;
 
@@ -91,12 +93,28 @@ public class ViewController implements ActionListener {
                 SCHEDULER_PORT
         );
 
-        new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6000);
-        new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6001);
+        DroneSubsystem drone1 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6000);
+        DroneSubsystem drone2 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6001);
+
+        try {
+            Thread.sleep(10); // let threads initialize
+        } catch (Exception e) {}
+
         new Thread(fireSystem).start();
 
         ViewController viewController = new ViewController(scheduler1, fireSystem);
         EventUI eventUI = new EventUI(viewController);
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+
+        try {
+            Thread.sleep(10000);
+        } catch (Exception e) {}
+
+
+        
     }
 
 

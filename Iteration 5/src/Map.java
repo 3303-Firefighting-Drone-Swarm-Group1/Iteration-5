@@ -18,7 +18,6 @@ public class Map {
     }
 
     public void updatePositions(){
-
         for (Drone drone: drones){
             drone.setLocation(drone.getX() + drone.getVX(), drone.getY() + drone.getVY());
         }
