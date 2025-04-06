@@ -1,6 +1,5 @@
 import java.io.*;
  import java.net.*;
- import java.util.Base64;
  
  public class RPCServer implements Runnable {
      private int port;
