@@ -52,6 +52,10 @@ public class Drone {
         return client.sendRequest(request);
     }
 
+    public Object sendRequest(Object request, int timeout){
+        return client.sendRequest(request, timeout);
+    }
+
     public int getPort(){
         return client.getPort();
     }
