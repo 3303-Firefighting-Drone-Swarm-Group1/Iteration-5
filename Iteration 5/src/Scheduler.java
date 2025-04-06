@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * the faulty drone is removed and the incident is requeued.
  */
 public class Scheduler {
+    public static final int TIMEOUT = 2000;
     private ArrayList<IncidentMessage> newMessages;
     private ArrayList<Drone> idle;
     private Map map;
@@ -91,11 +92,15 @@ public class Scheduler {
             //check if any returning drones are back
             for (Drone drone: returning.keySet()){
                 if (returning.get(drone) <= time){
-                    drone.sendRequest(makeTaskMessage(drone));
-                    idle.add(drone);
+                    if (drone.sendRequest(makeTaskMessage(drone), TIMEOUT) != null){
+                        idle.add(drone);
+                        drone.setVelocity(0, 0);
+                        drone.setLocation(0, 0);
+                    } else {
+                        System.out.println("Packet loss detected. Drone deleted.");
+                    }
                     returning.remove(drone);
-                    drone.setVelocity(0, 0);
-                    drone.setLocation(0, 0);
+                    
                     System.out.println("Drone returned at: " + new Time(time + 18000000));
                 }
             }
@@ -106,26 +111,47 @@ public class Scheduler {
                     Drone drone = idle.remove(0);
                     Fire fire = readyHigh.remove(0);
                     scheduled.put(drone, fire);
-                    long t = (long) drone.sendRequest(makeTaskMessage(fire, drone));
-                    enRoute.put(drone, time + t);
-                    drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
-                    drone.setLocation(0, 0);
+                    Object response = drone.sendRequest(makeTaskMessage(fire, drone), TIMEOUT);
+                    if (response != null){
+                        long t = (long) response;
+                        enRoute.put(drone, time + t);
+                        drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
+                        drone.setLocation(0, 0);
+                    } else {
+                        readyHigh.add(0, scheduled.get(drone));
+                        scheduled.remove(drone);
+                        System.out.println("Packet loss detected. Drone deleted.");
+                    }  
                 } else if (!readyModerate.isEmpty()){
                     Drone drone = idle.remove(0);
                     Fire fire = readyModerate.remove(0);
                     scheduled.put(drone, fire);
-                    long t = (long) drone.sendRequest(makeTaskMessage(fire, drone));
-                    enRoute.put(drone, time + t);
-                    drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
-                    drone.setLocation(0, 0);
+                    Object response = drone.sendRequest(makeTaskMessage(fire, drone), TIMEOUT);
+                    if (response != null){
+                        long t = (long) response;
+                        enRoute.put(drone, time + t);
+                        drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
+                        drone.setLocation(0, 0);
+                    } else {
+                        readyModerate.add(0, scheduled.get(drone));
+                        scheduled.remove(drone);
+                        System.out.println("Packet loss detected. Drone deleted.");
+                    }  
                 } else {
                     Drone drone = idle.remove(0);
                     Fire fire = readyLow.remove(0);
                     scheduled.put(drone, fire);
-                    long t = (long) drone.sendRequest(makeTaskMessage(fire, drone));
-                    enRoute.put(drone, time + t);
-                    drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
-                    drone.setLocation(0, 0);
+                    Object response = drone.sendRequest(makeTaskMessage(fire, drone), TIMEOUT);
+                    if (response != null){
+                        long t = (long) response;
+                        enRoute.put(drone, time + t);
+                        drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
+                        drone.setLocation(0, 0);
+                    } else {
+                        readyLow.add(0, scheduled.get(drone));
+                        scheduled.remove(drone);
+                        System.out.println("Packet loss detected. Drone deleted.");
+                    }  
                 }
                 System.out.println("Fire assigned to Drone at: " + new Time(time + 18000000));
             }
@@ -134,89 +160,135 @@ public class Scheduler {
             for (Drone drone: enRoute.keySet()){
                 if (enRoute.get(drone) <= time){
                     enRoute.remove(drone);
-                    long t = (long) drone.sendRequest(makeTaskMessage(scheduled.get(drone), drone));
-                    if (t > 0){
-                        droppingAgent.put(drone, time + t);
-                        System.out.println("Drone arrived at fire at time: " + new Time(time + 18000000));
-                    }
-                    else if (t == -69){
-                        transientFaulted.put(drone, time + 60000);
+                    Object response = drone.sendRequest(makeTaskMessage(scheduled.get(drone), drone));
+                    if (response != null){
+                        long t = (long) response;
+                        if (t > 0){
+                            droppingAgent.put(drone, time + t);
+                            System.out.println("Drone arrived at fire at time: " + new Time(time + 18000000));
+                        }
+                        else if (t == -69){
+                            transientFaulted.put(drone, time + 60000);
+                            Fire fire = scheduled.get(drone);
+                            fire.clearFault();
+                            int j = 0;
+                            switch (fire.getSeverity()){
+                                case HIGH:
+                                    while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
+                                    readyHigh.add(j, fire);
+                                    break;
+                                case MODERATE:
+                                    while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
+                                    readyModerate.add(j, fire);
+                                    break;
+                                case LOW:
+                                    while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
+                                    readyLow.add(j, fire);
+                                    break;
+                            }
+                            scheduled.remove(drone);
+                            System.out.println("Drone experienced a transient fault at time: " + new Time(time + 18000000));
+                        }
+                        else if (t == -420){
+                            Fire fire = scheduled.get(drone);
+                            fire.clearFault();
+                            int j = 0;
+                            switch (fire.getSeverity()){
+                                case HIGH:
+                                    while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
+                                    readyHigh.add(j, fire);
+                                    break;
+                                case MODERATE:
+                                    while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
+                                    readyModerate.add(j, fire);
+                                    break;
+                                case LOW:
+                                    while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
+                                    readyLow.add(j, fire);
+                                    break;
+                            }
+                            scheduled.remove(drone);
+                            hardFaulted.add(drone);
+                            System.out.println("Drone experienced a hard fault at time: " + new Time(time + 18000000));
+                        }
+                        drone.setVelocity(0, 0);
+                        if (t > 0) drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
+                    } else {
+                        System.out.println("Packet loss detected. Drone deleted.");
                         Fire fire = scheduled.get(drone);
-                        fire.clearFault();
                         int j = 0;
-                        switch (fire.getSeverity()){
+                        switch (scheduled.get(drone).getSeverity()){
                             case HIGH:
-                                while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
-                                readyHigh.add(j, fire);
-                                break;
-                            case MODERATE:
-                                while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
-                                readyModerate.add(j, fire);
-                                break;
-                            case LOW:
-                                while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
-                                readyLow.add(j, fire);
-                                break;
+                                    while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
+                                    readyHigh.add(j, fire);
+                                    break;
+                                case MODERATE:
+                                    while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
+                                    readyModerate.add(j, fire);
+                                    break;
+                                case LOW:
+                                    while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
+                                    readyLow.add(j, fire);
+                                    break;
                         }
                         scheduled.remove(drone);
-                        System.out.println("Drone experienced a transient fault at time: " + new Time(time + 18000000));
                     }
-                    else if (t == -420){
-                        Fire fire = scheduled.get(drone);
-                        fire.clearFault();
-                        int j = 0;
-                        switch (fire.getSeverity()){
-                            case HIGH:
-                                while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
-                                readyHigh.add(j, fire);
-                                break;
-                            case MODERATE:
-                                while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
-                                readyModerate.add(j, fire);
-                                break;
-                            case LOW:
-                                while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
-                                readyLow.add(j, fire);
-                                break;
-                        }
-                        scheduled.remove(drone);
-                        hardFaulted.add(drone);
-                        System.out.println("Drone experienced a hard fault at time: " + new Time(time + 18000000));
-                    }
-                    drone.setVelocity(0, 0);
-                    if (t > 0) drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
                 }
+                    
             }
+        
 
             //check if any drones finished dropping agent
             for (Drone drone: droppingAgent.keySet()){
                 if (droppingAgent.get(drone) <= time){
                     droppingAgent.remove(drone);
-                    long t = (long) drone.sendRequest(makeTaskMessage(scheduled.get(drone), drone));
-                    returning.put(drone, time + t);
-                    Fire fire = scheduled.get(drone);
-                    fire.putWater(Math.min(fire.getWater(), DroneSubsystem.SIZE_OF_TANK));
-                    if (fire.getWater() > 0){
-                        int j = 0;
-                        switch (fire.getSeverity()){
-                            case HIGH:
-                                while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
-                                readyHigh.add(j, fire);
-                                break;
-                            case MODERATE:
-                                while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
-                                readyModerate.add(j, fire);
-                                break;
-                            case LOW:
-                                while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
-                                readyLow.add(j, fire);
-                                break;
+                    Object response = drone.sendRequest(makeTaskMessage(scheduled.get(drone), drone), TIMEOUT);
+                    if (response != null){
+                        long t = (long) response;
+                        returning.put(drone, time + t);
+                        Fire fire = scheduled.get(drone);
+                        fire.putWater(Math.min(fire.getWater(), DroneSubsystem.SIZE_OF_TANK));
+                        if (fire.getWater() > 0){
+                            int j = 0;
+                            switch (fire.getSeverity()){
+                                case HIGH:
+                                    while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
+                                    readyHigh.add(j, fire);
+                                    break;
+                                case MODERATE:
+                                    while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
+                                    readyModerate.add(j, fire);
+                                    break;
+                                case LOW:
+                                    while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
+                                    readyLow.add(j, fire);
+                                    break;
+                            }
                         }
+                        drone.setVelocity(-drone.getX() / (double)t, -drone.getY() / (double)t);
+                        drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
+                        scheduled.remove(drone);
+                        System.out.println("Drone finished dropping water at: " + new Time(time + 18000000));
+                    } else {
+                        System.out.println("Packet loss detected. Drone deleted.");
+                        Fire fire = scheduled.get(drone);
+                        int j = 0;
+                        switch (scheduled.get(drone).getSeverity()){
+                            case HIGH:
+                                    while(j < readyHigh.size() && (fire.getDistance() > readyHigh.get(j).getDistance())) j++;
+                                    readyHigh.add(j, fire);
+                                    break;
+                                case MODERATE:
+                                    while(j < readyModerate.size() && (fire.getDistance() > readyModerate.get(j).getDistance())) j++;
+                                    readyModerate.add(j, fire);
+                                    break;
+                                case LOW:
+                                    while(j < readyLow.size() && (fire.getDistance() > readyLow.get(j).getDistance())) j++;
+                                    readyLow.add(j, fire);
+                                    break;
+                        }
+                        scheduled.remove(drone);
                     }
-                    drone.setVelocity(-drone.getX() / (double)t, -drone.getY() / (double)t);
-                    drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
-                    scheduled.remove(drone);
-                    System.out.println("Drone finished dropping water at: " + new Time(time + 18000000));
                 }
             }
 
@@ -224,10 +296,16 @@ public class Scheduler {
             for (Drone drone: transientFaulted.keySet()){
                 if (transientFaulted.get(drone) <= time){
                     transientFaulted.remove(drone);
-                    long t = (long) drone.sendRequest(makeTaskMessage(drone));
-                    returning.put(drone, time + t);
-                    drone.setVelocity(-drone.getX() / (double)t, -drone.getY() / (double)t);
-                    System.out.println("Drone recovered from a transient fault at: " + new Time(time + 18000000));
+                    Object response = drone.sendRequest(makeTaskMessage(drone) ,2000);
+                    if (response != null){
+                        long t = (long) response;
+                        returning.put(drone, time + t);
+                        drone.setVelocity(-drone.getX() / (double)t, -drone.getY() / (double)t);
+                        System.out.println("Drone recovered from a transient fault at: " + new Time(time + 18000000));
+                    } else {
+                        System.out.println("Packet loss detected. Drone deleted.");
+                        scheduled.remove(drone);
+                    }
                 }
             }
 
