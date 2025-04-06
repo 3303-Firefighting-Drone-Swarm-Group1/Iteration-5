@@ -10,7 +10,7 @@ public class GUI extends JFrame {
     ViewController controller;
 
     public GUI() {
-        super("System Overview");
+        super("Choose Input File");
 
 //        Frame Settings
         frame.setSize(1000, 1000);

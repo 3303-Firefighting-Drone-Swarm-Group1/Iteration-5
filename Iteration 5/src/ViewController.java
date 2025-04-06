@@ -91,8 +91,8 @@ public class ViewController implements ActionListener {
                 SCHEDULER_PORT
         );
 
-        new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6000);
-        new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6001);
+        //new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6000);
+        //new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6001);
         new Thread(fireSystem).start();
 
         ViewController viewController = new ViewController(scheduler1, fireSystem);
