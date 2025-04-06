@@ -1,5 +1,6 @@
 import java.io.*;
  import java.net.*;
+ import java.util.Base64;
  
  public class RPCServer implements Runnable {
      private int port;
@@ -12,24 +13,28 @@ import java.io.*;
  
      @Override
      public void run() {
-         try (ServerSocket serverSocket = new ServerSocket(port)) {
+         try (DatagramSocket socket = new DatagramSocket(port)) {
              System.out.println("RPC Server running on port " + port);
  
              while (true) {
-                 try (Socket socket = serverSocket.accept();
-                      ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                      ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
- 
-                     // Receive the request object
-                     Object request = in.readObject();
- 
+                 try {
+
+                    DatagramPacket packet = new DatagramPacket(new byte[10000], 10000);
+                    socket.receive(packet);
+                    Object req = fromString(packet.getData());
+                    int respondPort = packet.getPort();
+                      
+
                      // Process the request using the handler
-                     Object response = processRequest(request);
+                     Object response = processRequest(req);
+                     byte[] responseData= toString((Serializable)response);
  
                      // Send the response object
-                     out.writeObject(response);
-                     out.flush();
-                 } catch (IOException | ClassNotFoundException e) {
+                     packet.setLength(responseData.length);
+                     packet.setData(responseData);
+                     packet.setPort(respondPort);
+                     socket.send(packet);
+                 } catch (Exception e) {
                      e.printStackTrace();
                  }
              }
@@ -47,4 +52,28 @@ import java.io.*;
          }
          return null;
      }
+
+     private byte[] toString(final Object obj) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    
+        try (ObjectOutputStream out = new ObjectOutputStream(bos)) {
+            out.writeObject(obj);
+            out.flush();
+            return bos.toByteArray();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private Object fromString(byte[] bytes) {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+    
+        try (ObjectInput in = new ObjectInputStream(bis)) {
+            return in.readObject();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+
  }
