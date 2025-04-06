@@ -29,6 +29,9 @@ public class Map {
             }
             lastTime = time;
         }
+        for (Fire fire: fires){
+            if (fire.getWater() <= 0) fires.remove(fire);
+        }
     }
 
     public void removeFire(Fire fire){
