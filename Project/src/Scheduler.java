@@ -121,6 +121,7 @@ public class Scheduler {
                         drone.setLocation(0, 0);
                     } else {
                         System.out.println("Packet loss detected. Drone deleted.");
+                        drone.setState(DroneSubsystem.DroneState.FAULTED);
                     }
                     returning.remove(drone);
                     
@@ -140,10 +141,12 @@ public class Scheduler {
                         enRoute.put(drone, time + t);
                         drone.setVelocity(1000 * fire.getX() / (double)t, 1000 * fire.getY() / (double)t);
                         drone.setLocation(0, 0);
+                        drone.setState(DroneSubsystem.DroneState.EN_ROUTE);
                     } else {
                         readyHigh.add(0, scheduled.get(drone));
                         scheduled.remove(drone);
                         System.out.println("Packet loss detected. Drone deleted.");
+                        drone.setState(DroneSubsystem.DroneState.FAULTED);
                     }  
                 } else if (!readyModerate.isEmpty()){
                     Drone drone = idle.remove(0);
@@ -155,10 +158,12 @@ public class Scheduler {
                         enRoute.put(drone, time + t);
                         drone.setVelocity(1000 * fire.getX() / (double)t, 1000 * fire.getY() / (double)t);
                         drone.setLocation(0, 0);
+                        drone.setState(DroneSubsystem.DroneState.EN_ROUTE);
                     } else {
                         readyModerate.add(0, scheduled.get(drone));
                         scheduled.remove(drone);
                         System.out.println("Packet loss detected. Drone deleted.");
+                        drone.setState(DroneSubsystem.DroneState.FAULTED);
                     }  
                 } else {
                     Drone drone = idle.remove(0);
@@ -170,10 +175,12 @@ public class Scheduler {
                         enRoute.put(drone, time + t);
                         drone.setVelocity(1000 * fire.getX() / (double)t, 1000 * fire.getY() / (double)t);
                         drone.setLocation(0, 0);
+                        drone.setState(DroneSubsystem.DroneState.EN_ROUTE);
                     } else {
                         readyLow.add(0, scheduled.get(drone));
                         scheduled.remove(drone);
                         System.out.println("Packet loss detected. Drone deleted.");
+                        drone.setState(DroneSubsystem.DroneState.FAULTED);
                     }  
                 }
                 System.out.println("Fire assigned to Drone at: " + new Time(time + 18000000));
@@ -192,6 +199,7 @@ public class Scheduler {
                         }
                         else if (t == -69){
                             transientFaulted.put(drone, time + 60000);
+                            drone.setState(DroneSubsystem.DroneState.FAULTED);
                             Fire fire = scheduled.get(drone);
                             fire.clearFault();
                             int j = 0;
@@ -235,9 +243,11 @@ public class Scheduler {
                             System.out.println("Drone experienced a hard fault at time: " + new Time(time + 18000000));
                         }
                         drone.setVelocity(0, 0);
+                        drone.setState(DroneSubsystem.DroneState.DROPPING_AGENT);
                         if (t > 0) drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
                     } else {
                         System.out.println("Packet loss detected. Drone deleted.");
+                        drone.setState(DroneSubsystem.DroneState.FAULTED);
                         Fire fire = scheduled.get(drone);
                         int j = 0;
                         switch (scheduled.get(drone).getSeverity()){
@@ -290,11 +300,13 @@ public class Scheduler {
                         } else map.removeFire(fire);
                         drone.setVelocity(-1000 * drone.getX() / (double)t, -1000 * drone.getY() / (double)t);
                         drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
+                        drone.setState(DroneSubsystem.DroneState.RETURNING_TO_BASE);
                         scheduled.remove(drone);
                         System.out.println("Drone finished dropping water at: " + new Time(time + 18000000));
                     } else {
                         
                         System.out.println("Packet loss detected. Drone deleted.");
+                        drone.setState(DroneSubsystem.DroneState.FAULTED);
                         Fire fire = scheduled.get(drone);
                         int j = 0;
                         switch (scheduled.get(drone).getSeverity()){
@@ -325,6 +337,7 @@ public class Scheduler {
                         long t = (long) response;
                         returning.put(drone, time + t);
                         drone.setVelocity(-1000 * drone.getX() / (double)t, -1000 * drone.getY() / (double)t);
+                        drone.setState(DroneSubsystem.DroneState.RETURNING_TO_BASE);
                         System.out.println("Drone recovered from a transient fault at: " + new Time(time + 18000000));
                     } else {
                         System.out.println("Packet loss detected. Drone deleted.");

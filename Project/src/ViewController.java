@@ -28,7 +28,7 @@ public class ViewController implements ActionListener {
         this.availableZones = getZoneData();
         this.fireList = getFireIncidents();
         this.droneList = getDrones();
-        Timer timer = new Timer(150, this);
+        Timer timer = new Timer(15, this);
         timer.start();
     }
 
@@ -55,18 +55,7 @@ public class ViewController implements ActionListener {
     }
 
     public void updateFires() {
-        ArrayList<Fire> currentFires = getFireIncidents();
-        ArrayList<Fire> firesToRemove = new ArrayList<>();
-        System.out.println("Current Fires " + currentFires.size() + " fireList " + fireList.size());
-        for (Fire fire : fireList) {
-            if (!currentFires.contains(fire)) {
-                fireExtinguished(fire);
-                firesToRemove.add(fire);
-            }
-        }
-        fireList.removeAll(firesToRemove);
-        fireList.clear();
-        fireList.addAll(currentFires);
+
     }
 
     public void updateDrones(){

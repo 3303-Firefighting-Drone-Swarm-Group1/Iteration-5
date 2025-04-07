@@ -26,7 +26,7 @@ public class EventUI extends JFrame implements ActionListener {
         panel = new JPanel(new GridLayout(6, 0));
         zones = viewController.getZoneData();
 
-        setSize(1200, 900);
+        setSize(1000, 900);
         this.fires = viewController.fireList;
         this.extinguishedFires = viewController.extinguishedFireList;
         this.drones = viewController.droneList;
@@ -54,7 +54,7 @@ public class EventUI extends JFrame implements ActionListener {
 
 
 
-        Timer timer = new Timer(150, this);
+        Timer timer = new Timer(15, this);
         timer.setInitialDelay(200);
         timer.start();
 
@@ -72,14 +72,19 @@ public class EventUI extends JFrame implements ActionListener {
 
     public void writeLegend() {
         JTextArea b1 = new JTextArea("Active Fire");
+        b1.setEditable(false);
         b1.setBackground(Color.ORANGE);
-        JTextArea b2 = new JTextArea("Extinguished Fire");
-        b2.setBackground(Color.GREEN);
+        JTextArea b2 = new JTextArea("Drone faulted");
+        b2.setEditable(false);
+        b2.setBackground(Color.RED);
         JTextArea b3 = new JTextArea("Drone outbound");
+        b3.setEditable(false);
         b3.setBackground(Color.YELLOW);
         JTextArea b4 = new JTextArea("Drone extinguishing");
-        b4.setBackground(Color.BLUE);
+        b4.setEditable(false);
+        b4.setBackground(Color.CYAN);
         JTextArea b5 = new JTextArea("Drone returning");
+        b5.setEditable(false);
         b5.setBackground(Color.magenta);
         panel.add(b1);
         panel.add(b2);
@@ -120,19 +125,17 @@ class guiDrawing extends JPanel {
         int[] coordinates;
         int x = 1;
         for (Zone zone: zones.values()) {
-            g.setColor(Color.black);
+            g.setColor(Color.WHITE);
             coordinates = zone.getCoordinatesAsInt();
             //System.out.println("Rectangle coord:" + coordinates[0] + " " +  coordinates[1]+  " " + coordinates[2]+ " " + coordinates[3]);
             g.fillRect(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
             //System.out.println("zone " + (int) zone.getStart().getY() + "Dimensions" + zone.getEnd().getY());
-            g.setColor(Color.WHITE);
+            g.setColor(Color.BLACK);
             g.fillRect(coordinates[0]+2, coordinates[1] +2, coordinates[2] -2, coordinates[3] -2);
             String temp = String.valueOf(x++);
-            g.setColor(Color.BLACK);
+            g.setColor(Color.WHITE);
             g.drawString(temp, coordinates[0] + 20, coordinates[1] + 20);
         }
-
-        System.out.println("Working: "+ fires.size() + extinguishedFires.size());
 
         for (Fire fire: fires) {
             if (extinguishedFires.contains(fire)) {
@@ -142,20 +145,21 @@ class guiDrawing extends JPanel {
             }
             g.fillRect((int)(fire.getX() - 10), (int)(fire.getY() - 10), 20, 20);
             String temp = "Fire";
-            g.drawString(temp, (int)(fire.getX() + 10), (int)(fire.getX() + 10));
+            g.drawString(temp, (int)(fire.getX() + 10), (int)(fire.getY() + 10));
         }
 
         for (Drone drone: drones) {
+            g.setColor(Color.BLACK);
             if (drone.getState().equals(DroneSubsystem.DroneState.RETURNING_TO_BASE)) {
                 g.setColor(Color.MAGENTA);
             } else if (drone.getState().equals(DroneSubsystem.DroneState.EN_ROUTE)) {
                 g.setColor(Color.YELLOW);
             } else if (drone.getState().equals(DroneSubsystem.DroneState.DROPPING_AGENT)) {
-                g.setColor(Color.BLUE);
+                g.setColor(Color.CYAN);
             }
             g.fillRect((int)(drone.getX() - 5), (int)(drone.getY() - 5), 10, 10);
             String temp = "Drone";
-            g.drawString(temp, (int)(drone.getX() + 10), (int)(drone.getX() + 10));
+            g.drawString(temp, (int)(drone.getX() + 10), (int)(drone.getY() + 10));
         }
     }
 }
