@@ -60,6 +60,9 @@ public class EventUI extends JFrame implements ActionListener {
 
     }
 
+    /**
+     * Updates the gui with current data
+     */
     public void updateMap() {
         map.updateData(viewController.fireList, viewController.droneList, viewController.extinguishedFireList);
         map.repaint();
@@ -70,6 +73,9 @@ public class EventUI extends JFrame implements ActionListener {
         updateMap();
     }
 
+    /**
+     * Adds the legend to the gui
+     */
     public void writeLegend() {
         JTextArea b1 = new JTextArea("Active Fire");
         b1.setEditable(false);
