@@ -1,3 +1,7 @@
+/**
+ * An extension to JFrame that is suitable for a GUI
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

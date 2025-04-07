@@ -1,5 +1,9 @@
+/**
+ * A Server object used to recieve messages from clients
+ */
+
 import java.io.*;
- import java.net.*;
+import java.net.*;
  
  public class RPCServer implements Runnable {
      private int port;
@@ -42,6 +46,11 @@ import java.io.*;
          }
      }
  
+     /**
+      * Delegates handling the incoming message to the associated handler
+      * @param request The incoming object
+      * @return the response
+      */
      private Object processRequest(Object request) {
          // Handle the request based on the handler
          if (handler instanceof Scheduler) {
@@ -52,6 +61,11 @@ import java.io.*;
          return null;
      }
 
+     /**
+      * Converts a serialiable object to a byte array
+      * @param obj the object to be converted
+      * @return the byte array
+      */
      private byte[] toString(final Object obj) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
     
@@ -64,6 +78,11 @@ import java.io.*;
         }
     }
 
+    /**
+     * Converts a byte array to its associated serializable object
+     * @param bytes the bytes to be converted
+     * @return the object
+     */
     private Object fromString(byte[] bytes) {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
     
