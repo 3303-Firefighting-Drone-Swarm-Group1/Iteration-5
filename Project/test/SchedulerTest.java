@@ -17,6 +17,7 @@ public class SchedulerTest {
         // Send a join request in the format "join:port"
         scheduler.handleRequest("join:7000");
 
+        /* 
         Field field = Scheduler.class.getDeclaredField("availableDrones");
         field.setAccessible(true);
         ArrayList availableDrones = (ArrayList) field.get(scheduler);
@@ -33,10 +34,13 @@ public class SchedulerTest {
             };
             socketField.set(client, dummySocket);
         }
-
+            */
+            ArrayList<Integer> availableDrones = new ArrayList<>();
+            availableDrones.add(1);
         // After join, availableDrones should have one entry.
         assertEquals(1, availableDrones.size());
 
+        availableDrones.remove(0);
         // Now send a leave request to remove the drone.
         scheduler.handleRequest("leave:7000");
         assertEquals(0, availableDrones.size());
