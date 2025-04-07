@@ -1,5 +1,4 @@
 import org.junit.Test;
-import java.awt.Point;
 import static org.junit.Assert.*;
 
 public class ZoneTest {
