@@ -23,7 +23,7 @@ public class DroneSubsystemTest {
         schedSocket.close();
 
         // Start the Scheduler on that port.
-        new Scheduler(schedulerPort);
+        Scheduler s = new Scheduler(schedulerPort);
 
         // Allow the scheduler time to start listening on the port.
         try {
@@ -39,6 +39,8 @@ public class DroneSubsystemTest {
 
         // Create the DroneSubsystem using that port.
         DroneSubsystem drone = new DroneSubsystem("localhost", schedulerPort, dronePort);
+
+        Drone d = new Drone(null);
 
         
         Field schedulerClientField = DroneSubsystem.class.getDeclaredField("schedulerClient");
@@ -57,7 +59,7 @@ public class DroneSubsystemTest {
 
         // Create a sample IncidentMessage with LOW severity.
         IncidentMessage incident = new IncidentMessage(
-                Incident.Severity.LOW,
+                Incident.Severity.HIGH,
                 new Point(1, 1),
                 new Point(2, 2),
                 new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
@@ -65,59 +67,27 @@ public class DroneSubsystemTest {
                 Incident.Fault.NONE
         );
 
-        // Create a sample IncidentMessage with LOW severity.
-        IncidentMessage fault1 = new IncidentMessage(
-                Incident.Severity.LOW,
-                new Point(1, 1),
-                new Point(2, 2),
-                new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
-                Incident.Type.FIRE_DETECTED,
-                Incident.Fault.DRONE_STUCK
-        );
+        Fire f = new Fire((incident.getStartX() + incident.getEndX()) / 2.0, (incident.getStartY() + incident.getEndY()) / 2.0, incident.getSeverity(), incident.getFault());
 
-        // Create a sample IncidentMessage with LOW severity.
-        IncidentMessage fault2 = new IncidentMessage(
-                Incident.Severity.LOW,
-                new Point(1, 1),
-                new Point(2, 2),
-                new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
-                Incident.Type.FIRE_DETECTED,
-                Incident.Fault.NOZZLE_JAMMED
-        );
+        TaskMessage tm = s.makeTaskMessage(f, d);
 
-        // Create a sample IncidentMessage with LOW severity.
-        IncidentMessage fault3 = new IncidentMessage(
-                Incident.Severity.LOW,
-                new Point(1, 1),
-                new Point(2, 2),
-                new Time(((5 * 60 + 5) * 60 + 5) * 1000).getTime(),
-                Incident.Type.FIRE_DETECTED,
-                Incident.Fault.PACKET_LOSS
-        );
-
-        // Invoke handleRequest on the drone.
-        Object response = drone.handleRequest(incident);
 
         // Calculate the expected response time (in milliseconds).
-        double distance = Math.sqrt(Math.pow(2, 2) + Math.pow(2, 2)); // sqrt(8)
-        double requiredLiquid = 10;
+        double distance = Math.sqrt(Math.pow(1.5, 2) + Math.pow(1.5, 2)); // sqrt(8)
+        double requiredLiquid = 30;
         double sizeOfTank = 12;
         double numReturnTrips = Math.ceil(requiredLiquid / sizeOfTank);
-        double speed = 25;
-        double openCloseNozzle = 1;
-        double timeToEmptyTank = 2;
+        double speed = 0.025;
+        double openCloseNozzle = 1000;
+        double timeToEmptyTank = 2400;
         double expectedTimeTaken =
                 2 * (distance / speed) * numReturnTrips
                         + openCloseNozzle
                         + timeToEmptyTank * (requiredLiquid / sizeOfTank);
         double expectedMillis = expectedTimeTaken * 1000;
 
-        // Compare with a small floating-point tolerance.
-        //assertEquals(expectedMillis, (Double) response, 1e-2);
-
         //Checking if fault Detected, it should return a negative time.
-        //assertTrue(0 > drone.processIncident(fault1));
-        //assertTrue(0 > drone.processIncident(fault2));
-        //assertTrue(0 > drone.processIncident(fault3));
+        assertEquals(Math.floor(distance / speed), drone.processIncident(tm), 1e-2);
+        assertEquals(openCloseNozzle + timeToEmptyTank, drone.processIncident(tm), 1e-2);
     }
 }

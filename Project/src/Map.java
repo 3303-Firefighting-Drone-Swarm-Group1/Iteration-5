@@ -18,12 +18,13 @@ public class Map {
     }
 
     public void updatePositions(){
-        for (Drone drone: drones){
+        for (int i = 0; i < drones.size(); i++) {
+            Drone drone = drones.get(i);
             drone.setLocation(drone.getX() + drone.getVX(), drone.getY() + drone.getVY());
         }
 
-        for (Fire fire: fires){
-            if (fire.getWater() <= 0) fires.remove(fire);
+        for (int i = 0; i < fires.size(); i++) {
+            if (fires.get(i).getWater() <= 0) fires.remove(i);
         }
     }
 

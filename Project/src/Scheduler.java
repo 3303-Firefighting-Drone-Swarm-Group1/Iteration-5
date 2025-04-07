@@ -389,7 +389,7 @@ public class Scheduler {
         return minTime;
     }
 
-    private TaskMessage makeTaskMessage(Fire fire, Drone drone){
+    public TaskMessage makeTaskMessage(Fire fire, Drone drone){
         return new TaskMessage(Math.min(fire.getWater(), DroneSubsystem.SIZE_OF_TANK), new Point(fire.getX(), fire.getY()), new Point(drone.getX(), drone.getY()), fire.getFault());
     }
 

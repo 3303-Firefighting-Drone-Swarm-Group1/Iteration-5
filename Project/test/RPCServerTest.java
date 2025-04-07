@@ -20,16 +20,15 @@ public class RPCServerTest {
         try { Thread.sleep(100); } catch (InterruptedException e) { }
 
         // Connect to the RPCServer running on testPort.
-        Socket socket = new Socket("localhost", testPort);
-        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+        RPCClient rpcClient = new RPCClient("localhost", testPort);
 
         String message = "Test RPCServer";
+
+        String recieve = (String) rpcClient.sendRequest(message);
         //out.writeObject(message);
         // out.flush();
-        Object response = "Test RPCServer"; //in.readObject();
-        assertEquals(message, response);
+        //in.readObject();
+        assertEquals(message, recieve);
 
-        socket.close();
     }
 }
