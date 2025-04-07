@@ -54,6 +54,11 @@ public class FireIncidentSubsystem implements Runnable {
         schedulerClient.sendRequest(messages);
     }
 
+    /**
+     * Reads the Zone info from the zone input file
+     * @return
+     * @throws FileNotFoundException
+     */
     private HashMap<Integer, Zone> readZones() throws FileNotFoundException {
         Scanner sc = new Scanner(new File(zoneInput));
         HashMap<Integer, Zone> zones = new HashMap<>();
@@ -84,12 +89,20 @@ public class FireIncidentSubsystem implements Runnable {
         return zones;
     }
 
+    /**
+     * Prints the zone info
+     */
     public void printZones() {
         for (Zone zone : zones.values()) {
             System.out.println(zone);
         }
     }
 
+    /**
+     * Reads the incidents from the event input file
+     * @return
+     * @throws FileNotFoundException
+     */
     private ArrayList<Incident> readIncidents() throws FileNotFoundException {
         Scanner sc = new Scanner(new File(eventInput));
         ArrayList<Incident> incidents = new ArrayList<>();

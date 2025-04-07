@@ -11,7 +11,6 @@ public class PointTest {
 
         assertEquals(p.getX(), 3.0, 1e-2);
         assertEquals(p.getY(), 4.0, 1e-2);
-        assertEquals(p.getIntY(), 4);
         assertEquals(Point.distance(0.0, 0.0, x, y), 5.0, 1e-2);
     }
 }

@@ -15,7 +15,6 @@ public class EventUI extends JFrame implements ActionListener {
     HashMap<Integer, Zone> zones;
     JPanel panel;
     private ArrayList<Fire> fires;
-    private ArrayList<Fire> extinguishedFires;
     private ArrayList<Drone> drones;
 
     public EventUI(ViewController viewController) {
@@ -28,9 +27,8 @@ public class EventUI extends JFrame implements ActionListener {
 
         setSize(1000, 900);
         this.fires = viewController.fireList;
-        this.extinguishedFires = viewController.extinguishedFireList;
         this.drones = viewController.droneList;
-        this.map =  new guiDrawing(zones, fires, drones, extinguishedFires);
+        this.map =  new guiDrawing(zones, fires, drones);
         map.setPreferredSize(new Dimension(900, 900));
 
 
@@ -60,8 +58,11 @@ public class EventUI extends JFrame implements ActionListener {
 
     }
 
+    /**
+     * Updates the gui with current data
+     */
     public void updateMap() {
-        map.updateData(viewController.fireList, viewController.droneList, viewController.extinguishedFireList);
+        map.updateData(viewController.fireList, viewController.droneList);
         map.repaint();
     }
 
@@ -70,6 +71,9 @@ public class EventUI extends JFrame implements ActionListener {
         updateMap();
     }
 
+    /**
+     * Adds the legend to the gui
+     */
     public void writeLegend() {
         JTextArea b1 = new JTextArea("Active Fire");
         b1.setEditable(false);
@@ -100,20 +104,17 @@ public class EventUI extends JFrame implements ActionListener {
 class guiDrawing extends JPanel {
     public HashMap<Integer, Zone> zones = new HashMap<>();
     private ArrayList<Fire> fires;
-    private ArrayList<Fire> extinguishedFires;
     private ArrayList<Drone> drones;
 
-    public guiDrawing(HashMap<Integer, Zone> zones, ArrayList<Fire> fires, ArrayList<Drone> drones, ArrayList<Fire> extinguishedFires) {
+    public guiDrawing(HashMap<Integer, Zone> zones, ArrayList<Fire> fires, ArrayList<Drone> drones) {
         this.zones = zones;
         this.fires = fires;
         this.drones = drones;
-        this.extinguishedFires = extinguishedFires;
     }
 
-    public void updateData(ArrayList<Fire> fires, ArrayList<Drone> drones, ArrayList<Fire> extinguishedFires) {
+    public void updateData(ArrayList<Fire> fires, ArrayList<Drone> drones) {
         this.fires = fires;
         this.drones = drones;
-        this.extinguishedFires = extinguishedFires;
     }
 
     @Override
@@ -138,11 +139,7 @@ class guiDrawing extends JPanel {
         }
 
         for (Fire fire: fires) {
-            if (extinguishedFires.contains(fire)) {
-                g.setColor(Color.GREEN);
-            } else {
-                g.setColor(Color.ORANGE);
-            }
+            g.setColor(Color.ORANGE);
             g.fillRect((int)(fire.getX() - 10), (int)(fire.getY() - 10), 20, 20);
             String temp = "Fire";
             g.drawString(temp, (int)(fire.getX() + 10), (int)(fire.getY() + 10));

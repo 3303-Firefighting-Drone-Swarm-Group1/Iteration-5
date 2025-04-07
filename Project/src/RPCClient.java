@@ -1,5 +1,9 @@
+/**
+ * A Client object used to communicate with Server objects
+ */
+
 import java.io.*;
- import java.net.*;
+import java.net.*;
  
  public class RPCClient {
      private String host;
@@ -11,10 +15,19 @@ import java.io.*;
          this.port = port;
      }
 
+     /**
+      * Gets the port of the socket used by the RPCClient
+      * @return the port number
+      */
      public int getPort(){
         return socket.getLocalPort();
      }
  
+     /**
+      * Sends a message to the associated server
+      * @param request the message sent
+      * @return the response
+      */
      public Object sendRequest(Object request) {
          try {
             socket = new DatagramSocket();
@@ -28,6 +41,13 @@ import java.io.*;
          }
      }
 
+     /**
+      * 
+      * Sends a message to the associated server
+      * @param request the message sent
+      * @param timeout the time allowed for a response
+      * @return the response
+      */
      public Object sendRequest(Object request, int timeout){
         try {
             socket = new DatagramSocket();
@@ -43,6 +63,11 @@ import java.io.*;
      }
 
 
+     /**
+      * Converts a serialiable object to a byte array
+      * @param obj the object to be converted
+      * @return the byte array
+      */
      private byte[] toString(final Object obj) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
     
@@ -55,6 +80,11 @@ import java.io.*;
         }
     }
 
+    /**
+     * Converts a byte array to its associated serializable object
+     * @param bytes the bytes to be converted
+     * @return the object
+     */
     private Object fromString(byte[] bytes) {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
     

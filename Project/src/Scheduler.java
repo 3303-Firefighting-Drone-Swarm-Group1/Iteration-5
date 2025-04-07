@@ -16,12 +16,6 @@ public class Scheduler {
 
     //Subscribed Classes
     private ViewController viewController;
-    //Tells GUI to reflect changes
-    public void notifyController() {
-        if (viewController != null) {
-            viewController.update();
-        }
-    }
 
     public Scheduler(int schedulerPort, ViewController viewController) {
         this.viewController = viewController;
@@ -37,6 +31,11 @@ public class Scheduler {
         map = new Map();
     }
 
+    /**
+     * Deals with incoming RPC messages
+     * @param request the incoming message
+     * @return the response
+     */
     public Object handleRequest(Object request) {
         if (request instanceof ArrayList<?>) {
             newMessages = (ArrayList<IncidentMessage>) request;
@@ -59,6 +58,9 @@ public class Scheduler {
         return null;
     }
 
+    /**
+     * Simulates fire extinguishing with the currrent drones.
+     */
     private void schedule()
     {
         //fires
@@ -108,7 +110,6 @@ public class Scheduler {
                             map.addFire(f);
                             break;
                     }
-                    notifyController();
                     System.out.println("Fire exists at: " + new Time(time + 18000000));
 
                 }
@@ -359,7 +360,6 @@ public class Scheduler {
 
             // Increment time for simulation.
             map.updatePositions();
-            notifyController();
             time+= 1000;
             try {
                 Thread.sleep(20);
@@ -380,6 +380,10 @@ public class Scheduler {
         System.out.printf("Average extinguished time: %.2f minutes\n", sum / (60000.0 * (double)extinguishedTimes.size()));
     }
 
+    /**
+     * Gets the first time that a fire appears, in ms
+     * @return the first time
+     */
     private long getMinTime() {
         long minTime = Long.MAX_VALUE;
         for (IncidentMessage message : newMessages) {
@@ -393,14 +397,27 @@ public class Scheduler {
         return new TaskMessage(Math.min(fire.getWater(), DroneSubsystem.SIZE_OF_TANK), new Point(fire.getX(), fire.getY()), new Point(drone.getX(), drone.getY()), fire.getFault());
     }
 
+    /**
+     * Makes a task message to be sent to a drone
+     * @param drone The drone handling the task
+     * @return The task message
+     */
     private TaskMessage makeTaskMessage(Drone drone){
         return new TaskMessage(0, new Point(drone.getX(), drone.getY()), new Point(drone.getX(), drone.getY()), null);
     }
 
+    /**
+     * Gets the map of the scheduler's current state
+     * @return the map
+     */
     public Map getMap() {
         return map;
     }
 
+    /**
+     * Sets the view controller associated with the scheduler
+     * @param viewController the view controller
+     */
     public void setViewController(ViewController viewController) {
         this.viewController = viewController;
     }

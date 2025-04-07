@@ -24,6 +24,11 @@ public class DroneSubsystem {
         schedulerClient.sendRequest("join:" + dronePort);
     }
 
+    /**
+     * Handles incomming RPC communication
+     * @param request The incoming message
+     * @return The response
+     */
     public Object handleRequest(Object request) {
         if (request instanceof TaskMessage) {
             currentJobDetails = (TaskMessage) request;
@@ -33,6 +38,11 @@ public class DroneSubsystem {
         return null;
     }
 
+    /**
+     * Processes incoming tasks
+     * @param incident The task info
+     * @return Time in ms to complete the task
+     */
     public long processIncident(TaskMessage incident) {
         switch (state){
             case EN_ROUTE:
@@ -51,17 +61,22 @@ public class DroneSubsystem {
         }
     }
 
+    /**
+     * Calculate time if drone was previously enroute
+     * @param incident The task info
+     * @return Time in ms to complete the task
+     */
     private long enRoute(TaskMessage incident){
         switch (incident.getFault()){
             case DRONE_STUCK:
                 state = DroneState.FAULTED;
-                return -420;
+                return -2;
             case NOZZLE_JAMMED:
                 state = DroneState.FAULTED;
-                return -69;
+                return -1;
             case PACKET_LOSS:
                 state = DroneState.FAULTED;
-                return -69;
+                return -1;
             default:
                 state = DroneState.DROPPING_AGENT;
                 long responseTime = (long) (timeToEmptyTank * incident.getWater() / SIZE_OF_TANK + openCloseNozzle);
@@ -70,6 +85,11 @@ public class DroneSubsystem {
         }
     }
 
+    /**
+     * Calculate time if drone was previously dropping agent
+     * @param incident The task info
+     * @return Time in ms to complete the task
+     */
     private long droppingAgent(TaskMessage incident){
         double distance = Math.sqrt(Math.pow(incident.getFireLocation().getX(), 2) + Math.pow(incident.getFireLocation().getY(), 2));
         /*
@@ -84,6 +104,11 @@ public class DroneSubsystem {
         return (long) (distance / speed);
     }
 
+    /**
+     * Calculate time if drone was previously idle
+     * @param incident The task info
+     * @return Time in ms to complete the task
+     */
     private long idle(TaskMessage incident){
         double distance = Math.sqrt(Math.pow(incident.getFireLocation().getX(), 2) + Math.pow(incident.getFireLocation().getY(), 2));
         System.out.println("Drone " + dronePort + " responding to fire at zone " +
@@ -94,11 +119,21 @@ public class DroneSubsystem {
         return (long) (distance / speed);
     }
 
+    /**
+     * Calculate time if drone was previously returning to base
+     * @param incident The task info
+     * @return Time in ms to complete the task
+     */
     private long returningToBase(TaskMessage incident){
         state = DroneState.IDLE;
         return 0;
     }
 
+    /**
+     * Calculate time if drone was previously faulted
+     * @param incident The task info
+     * @return Time in ms to complete the task
+     */
     private long faulted(TaskMessage incident){
         double distance = Math.sqrt(Math.pow(incident.getFireLocation().getX(), 2) + Math.pow(incident.getFireLocation().getY(), 2));
         totalDistance += distance;
@@ -106,6 +141,10 @@ public class DroneSubsystem {
         return (long) (distance / speed);
     }
 
+    /**
+     * Gets the total distance the drone has travelled
+     * @return the total distance
+     */
     public double getTotalDistance() {
         return totalDistance;
     }

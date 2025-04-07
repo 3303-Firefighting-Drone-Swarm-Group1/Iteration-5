@@ -1,3 +1,7 @@
+/**
+ * The controller for the GUI showing the Fire system.
+ */
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,7 +14,6 @@ public class ViewController implements ActionListener {
     public HashMap availableZones;
     //private String objectName = "ViewController";
     ArrayList<Fire> fireList;
-    ArrayList<Fire> extinguishedFireList = new ArrayList<>();
     ArrayList<Drone> droneList;
 
     private static final String SCHEDULER_HOST = "localhost";
@@ -24,6 +27,9 @@ public class ViewController implements ActionListener {
     }
 
 
+    /**
+     * Gets the info needed for the GUI
+     */
     public void initialize() {
         this.availableZones = getZoneData();
         this.fireList = getFireIncidents();
@@ -32,40 +38,30 @@ public class ViewController implements ActionListener {
         timer.start();
     }
 
-
-    public void update() {
-        //Recall Drones method to add new drones and location
-        updateFires();
-        updateDrones();
-        //updateGUI
-    }
-
-
-
+    /**
+     * Gets the zone information
+     * @return The zone information
+     */
     public HashMap<Integer, Zone> getZoneData() {
         return fireIncidentSubsystem.zones;
     }
 
+    /**
+     * Gets the fires
+     * @return the fires
+     */
     public ArrayList<Fire> getFireIncidents() {
         return scheduler.getMap().getFires();
     }
 
+    /**
+     * Gets the drones
+     * @return the drones
+     */
     public ArrayList<Drone> getDrones() {
         return scheduler.getMap().getDrones();
     }
 
-    public void updateFires() {
-
-    }
-
-    public void updateDrones(){
-        this.droneList = getDrones();
-    }
-
-    //May need to change
-    public void fireExtinguished(Fire fire) {
-        extinguishedFireList.add(fire);
-    }
 
 
     public static void main(String[] args) {
@@ -114,10 +110,7 @@ public class ViewController implements ActionListener {
         
     }
 
-
-
     @Override
     public void actionPerformed(ActionEvent e) {
-        update();
     }
 }
