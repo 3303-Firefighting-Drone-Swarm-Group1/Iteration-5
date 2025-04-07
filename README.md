@@ -20,8 +20,8 @@ Implement or enforce capacity limits so that drones can only service zones if th
 Develop a real-time display console GUI to show each drone's current position on a map/grid and report any system faults — designed for use by the fire dispatcher at headquarters <br/>
 
 Related Diagrams:  
-![Class Diagram](Iteration5_Class_Diagram.png)  
-![State Machine Diagram](Iteration5_Drone_State_Machine.png)  
-![Sequence Diagram](Iteration5_Fault_Handling_Task_Sequence_Diagram.png)  
-![Sequence Diagram](Iteration5_Normal_Task_Sequence_Diagram.png)  
-![State Machine Diagram](Iteration5_Scheduler_State_Machine.png)
+![Class Diagram](Iteration 5/diagrams/Iteration5_Class_Diagram.png)  
+![State Machine Diagram](Iteration 5/diagrams/Iteration5_Drone_State_Machine.png)  
+![Sequence Diagram](Iteration 5/diagrams/Iteration5_Fault_Handling_Task_Sequence_Diagram.png)  
+![Sequence Diagram](Iteration 5/diagrams/Iteration5_Normal_Task_Sequence_Diagram.png)  
+![State Machine Diagram](Iteration 5/diagrams/Iteration5_Scheduler_State_Machine.png)
