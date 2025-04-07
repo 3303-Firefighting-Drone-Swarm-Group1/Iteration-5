@@ -19,6 +19,7 @@ Total simulation time to extinguish all fires <br/>
 Average response time and extinguish time for all fires <br/>
 Implement or enforce capacity limits so that drones can only service zones if they have a full water tank <br/>
 Develop a real-time display console GUI to show each drone's current position on a map/grid and report any system faults — designed for use by the fire dispatcher at headquarters <br/>
+Added test files, DroneTest, FireTest, MapTest, PointTest, TaskMessageTest <br/>
 
 Related Diagrams:  
 ![Class Diagram](Iteration5_Class_Diagram.png)  
