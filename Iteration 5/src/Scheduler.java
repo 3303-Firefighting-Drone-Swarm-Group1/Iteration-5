@@ -77,7 +77,8 @@ public class Scheduler {
         ConcurrentHashMap<Drone, Fire> scheduled = new ConcurrentHashMap<>();
 
         // For simulation, use a simple time counter.
-        long time = getMinTime();
+        long minTime = getMinTime();
+        long time = minTime;
         while (!newMessages.isEmpty() || !readyHigh.isEmpty() || !readyModerate.isEmpty() || !readyLow.isEmpty() || !enRoute.isEmpty() || !droppingAgent.isEmpty() || !returning.isEmpty() || !transientFaulted.isEmpty()) {
 
             //check for newly active fires
@@ -137,7 +138,7 @@ public class Scheduler {
                     if (response != null){
                         long t = (long) response;
                         enRoute.put(drone, time + t);
-                        drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
+                        drone.setVelocity(1000 * fire.getX() / (double)t, 1000 * fire.getY() / (double)t);
                         drone.setLocation(0, 0);
                     } else {
                         readyHigh.add(0, scheduled.get(drone));
@@ -152,7 +153,7 @@ public class Scheduler {
                     if (response != null){
                         long t = (long) response;
                         enRoute.put(drone, time + t);
-                        drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
+                        drone.setVelocity(1000 * fire.getX() / (double)t, 1000 * fire.getY() / (double)t);
                         drone.setLocation(0, 0);
                     } else {
                         readyModerate.add(0, scheduled.get(drone));
@@ -167,7 +168,7 @@ public class Scheduler {
                     if (response != null){
                         long t = (long) response;
                         enRoute.put(drone, time + t);
-                        drone.setVelocity(fire.getX() / (double)t, fire.getY() / (double)t);
+                        drone.setVelocity(1000 * fire.getX() / (double)t, 1000 * fire.getY() / (double)t);
                         drone.setLocation(0, 0);
                     } else {
                         readyLow.add(0, scheduled.get(drone));
@@ -286,12 +287,13 @@ public class Scheduler {
                                     readyLow.add(j, fire);
                                     break;
                             }
-                        }
-                        drone.setVelocity(-drone.getX() / (double)t, -drone.getY() / (double)t);
+                        } else map.removeFire(fire);
+                        drone.setVelocity(-1000 * drone.getX() / (double)t, -1000 * drone.getY() / (double)t);
                         drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
                         scheduled.remove(drone);
                         System.out.println("Drone finished dropping water at: " + new Time(time + 18000000));
                     } else {
+                        
                         System.out.println("Packet loss detected. Drone deleted.");
                         Fire fire = scheduled.get(drone);
                         int j = 0;
@@ -322,7 +324,7 @@ public class Scheduler {
                     if (response != null){
                         long t = (long) response;
                         returning.put(drone, time + t);
-                        drone.setVelocity(-drone.getX() / (double)t, -drone.getY() / (double)t);
+                        drone.setVelocity(-1000 * drone.getX() / (double)t, -1000 * drone.getY() / (double)t);
                         System.out.println("Drone recovered from a transient fault at: " + new Time(time + 18000000));
                     } else {
                         System.out.println("Packet loss detected. Drone deleted.");
@@ -332,11 +334,16 @@ public class Scheduler {
             }
 
             // Increment time for simulation.
-            map.updatePositions(time);
+            map.updatePositions();
             notifyController();
-            time++;
+            time+= 1000;
+            try {
+                Thread.sleep(10);
+            } catch (Exception e) {}
         }
-        System.out.println("Scheduling finished.");
+
+        System.out.println("=== Simulation Summary ===");
+        System.out.printf("Total time to extinguish all fires: %.2f minutes\n", (time - minTime) / 60000.0);
     }
 
     private long getMinTime() {
