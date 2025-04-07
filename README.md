@@ -7,7 +7,7 @@ Coding - Lucas/Sam/Ahmed <br/>
 Testing - Marc <br/>
 
 How to Run <br/>
-Download file using .zip on Github. Extract project. <br/>
+Download file using .zip on Github. Extract project. Ensure the folder called "Iteration-5" is the one opened. <br/>
 Run the Main.java File.
 <br/>
 How to Run Tests <br/>

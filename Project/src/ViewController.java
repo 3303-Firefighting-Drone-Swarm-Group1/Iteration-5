@@ -2,7 +2,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.HashMap;
 
 public class ViewController implements ActionListener {
@@ -88,7 +87,7 @@ public class ViewController implements ActionListener {
 
         Scheduler scheduler1 = new Scheduler(SCHEDULER_PORT);
         FireIncidentSubsystem fireSystem = new FireIncidentSubsystem(
-                "Iteration 5/input/sample_zone_file.csv", "Iteration 5/input/Sample_event_file.csv",
+                "Project/input/sample_zone_file.csv", "Project/input/Sample_event_file.csv",
                 SCHEDULER_HOST,
                 SCHEDULER_PORT
         );
