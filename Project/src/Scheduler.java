@@ -338,7 +338,7 @@ public class Scheduler {
             notifyController();
             time+= 1000;
             try {
-                Thread.sleep(10);
+                Thread.sleep(20);
             } catch (Exception e) {}
         }
 
