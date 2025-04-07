@@ -11,7 +11,7 @@ public class TaskMessageTest {
 
         TaskMessage tm = new TaskMessage(water, fireLocation, droneLocation, fault);
 
-        assertEquals(tm.getWater(), 42.0);
+        assertEquals(tm.getWater(), 42.0, 1e-2);
         assertEquals(tm.getFireLocation(), fireLocation);
         assertEquals(tm.getDroneLocation(), droneLocation);
         assertEquals(tm.getFault(), Incident.Fault.DRONE_STUCK);
