@@ -14,6 +14,9 @@ public class EventUI extends JFrame implements ActionListener {
     ViewController viewController;
     HashMap<Integer, Zone> zones;
     JPanel panel;
+    private ArrayList<Fire> fires;
+    private ArrayList<Fire> extinguishedFires;
+    private ArrayList<Drone> drones;
 
     public EventUI(ViewController viewController) {
         super("Event UI");
@@ -24,7 +27,10 @@ public class EventUI extends JFrame implements ActionListener {
         zones = viewController.getZoneData();
 
         setSize(1200, 900);
-        this.map =  new guiDrawing(zones, viewController.fireList, viewController.droneList, viewController.extinguishedFireList);
+        this.fires = viewController.fireList;
+        this.extinguishedFires = viewController.extinguishedFireList;
+        this.drones = viewController.droneList;
+        this.map =  new guiDrawing(zones, fires, drones, extinguishedFires);
         map.setPreferredSize(new Dimension(900, 900));
 
 
@@ -126,16 +132,17 @@ class guiDrawing extends JPanel {
             g.drawString(temp, coordinates[0] + 20, coordinates[1] + 20);
         }
 
-        //System.out.println("Working: "+ fires.size() + extinguishedFires.size());
+        System.out.println("Working: "+ fires.size() + extinguishedFires.size());
 
         for (Fire fire: fires) {
-            //if (extinguishedFires.contains(fire)) {
-                //g.setColor(Color.GREEN);
-            //} else {
+            if (extinguishedFires.contains(fire)) {
+                g.setColor(Color.GREEN);
+            } else {
                 g.setColor(Color.ORANGE);
-            //}
+            }
             g.fillRect((int)(fire.getX() - 10), (int)(fire.getY() - 10), 20, 20);
-            System.out.println("Fire:" + fire.getX());
+            String temp = "Fire";
+            g.drawString(temp, (int)(fire.getX() + 10), (int)(fire.getX() + 10));
         }
 
         for (Drone drone: drones) {

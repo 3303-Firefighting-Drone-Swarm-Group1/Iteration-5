@@ -15,7 +15,7 @@ public class ViewController implements ActionListener {
     ArrayList<Drone> droneList;
 
     private static final String SCHEDULER_HOST = "localhost";
-    private static final int SCHEDULER_PORT = 5010; // Port for Scheduler's RPC server
+    private static final int SCHEDULER_PORT = 5030; // Port for Scheduler's RPC server
 
 
     public ViewController(Scheduler scheduler, FireIncidentSubsystem fireIncidentSubsystem) {
@@ -58,7 +58,7 @@ public class ViewController implements ActionListener {
     public void updateFires() {
         ArrayList<Fire> currentFires = getFireIncidents();
         ArrayList<Fire> firesToRemove = new ArrayList<>();
-
+        System.out.println("Current Fires " + currentFires.size() + " fireList " + fireList.size());
         for (Fire fire : fireList) {
             if (!currentFires.contains(fire)) {
                 fireExtinguished(fire);
