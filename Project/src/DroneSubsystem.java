@@ -72,6 +72,13 @@ public class DroneSubsystem {
 
     private long droppingAgent(TaskMessage incident){
         double distance = Math.sqrt(Math.pow(incident.getFireLocation().getX(), 2) + Math.pow(incident.getFireLocation().getY(), 2));
+        /*
+        if (dronePort == 6002) {
+            try {
+                Thread.sleep(4000);
+            } catch (Exception e) {}
+        }
+        */
         state = DroneState.RETURNING_TO_BASE;
         totalDistance += distance;
         return (long) (distance / speed);

@@ -65,6 +65,9 @@ public class Scheduler {
         ArrayList<Fire> readyHigh = new ArrayList<>();
         ArrayList<Fire> readyModerate = new ArrayList<>();
         ArrayList<Fire> readyLow = new ArrayList<>();
+        ConcurrentHashMap<Fire, Long> fireTimes = new ConcurrentHashMap<>();
+        ArrayList<Long> responseTimes = new ArrayList<>();
+        ArrayList<Long> extinguishedTimes = new ArrayList<>();
 
         //drones
         ConcurrentHashMap<Drone, Long> enRoute = new ConcurrentHashMap<>();
@@ -85,25 +88,24 @@ public class Scheduler {
             for (int i = 0; i < newMessages.size(); i++){
                 if (newMessages.get(i).getTime() <= time){
                     IncidentMessage temp = newMessages.remove(i);
+                    Fire f = new Fire((temp.getStartX() + temp.getEndX()) / 2.0, (temp.getStartY() + temp.getEndY()) / 2.0, temp.getSeverity(), temp.getFault());
+                    fireTimes.put(f, time);
                     int j = 0;
                     switch (temp.getSeverity()){
                         case HIGH:
                             while(j < readyHigh.size() && (temp.getDistance() > readyHigh.get(j).getDistance())) j++;
-                            Fire f1 = new Fire((temp.getStartX() + temp.getEndX()) / 2.0, (temp.getStartY() + temp.getEndY()) / 2.0, temp.getSeverity(), temp.getFault());
-                            readyHigh.add(j, f1);
-                            map.addFire(f1);
+                            readyHigh.add(j, f);
+                            map.addFire(f);
                             break;
                         case MODERATE:
                             while(j < readyModerate.size() && (temp.getDistance() > readyModerate.get(j).getDistance())) j++;
-                            Fire f2 = new Fire((temp.getStartX() + temp.getEndX()) / 2.0, (temp.getStartY() + temp.getEndY()) / 2.0, temp.getSeverity(), temp.getFault());
-                            readyModerate.add(j, f2);
-                            map.addFire(f2);
+                            readyModerate.add(j, f);
+                            map.addFire(f);
                             break;
                         case LOW:
                             while(j < readyLow.size() && (temp.getDistance() > readyLow.get(j).getDistance())) j++;
-                            Fire f3 = new Fire((temp.getStartX() + temp.getEndX()) / 2.0, (temp.getStartY() + temp.getEndY()) / 2.0, temp.getSeverity(), temp.getFault());
-                            readyLow.add(j, f3);
-                            map.addFire(f3);
+                            readyLow.add(j, f);
+                            map.addFire(f);
                             break;
                     }
                     notifyController();
@@ -134,6 +136,7 @@ public class Scheduler {
                 if (!readyHigh.isEmpty()){
                     Drone drone = idle.remove(0);
                     Fire fire = readyHigh.remove(0);
+                    responseTimes.add(time - fireTimes.get(fire));
                     scheduled.put(drone, fire);
                     Object response = drone.sendRequest(makeTaskMessage(fire, drone), TIMEOUT);
                     if (response != null){
@@ -151,6 +154,7 @@ public class Scheduler {
                 } else if (!readyModerate.isEmpty()){
                     Drone drone = idle.remove(0);
                     Fire fire = readyModerate.remove(0);
+                    responseTimes.add(time - fireTimes.get(fire));
                     scheduled.put(drone, fire);
                     Object response = drone.sendRequest(makeTaskMessage(fire, drone), TIMEOUT);
                     if (response != null){
@@ -168,6 +172,7 @@ public class Scheduler {
                 } else {
                     Drone drone = idle.remove(0);
                     Fire fire = readyLow.remove(0);
+                    responseTimes.add(time - fireTimes.get(fire));
                     scheduled.put(drone, fire);
                     Object response = drone.sendRequest(makeTaskMessage(fire, drone), TIMEOUT);
                     if (response != null){
@@ -196,6 +201,7 @@ public class Scheduler {
                         if (t > 0){
                             droppingAgent.put(drone, time + t);
                             System.out.println("Drone arrived at fire at time: " + new Time(time + 18000000));
+                            drone.setState(DroneSubsystem.DroneState.DROPPING_AGENT);
                         }
                         else if (t == -69){
                             transientFaulted.put(drone, time + 60000);
@@ -219,6 +225,7 @@ public class Scheduler {
                             }
                             scheduled.remove(drone);
                             System.out.println("Drone experienced a transient fault at time: " + new Time(time + 18000000));
+                            drone.setState(DroneSubsystem.DroneState.FAULTED);
                         }
                         else if (t == -420){
                             Fire fire = scheduled.get(drone);
@@ -241,9 +248,10 @@ public class Scheduler {
                             scheduled.remove(drone);
                             hardFaulted.add(drone);
                             System.out.println("Drone experienced a hard fault at time: " + new Time(time + 18000000));
+                            drone.setState(DroneSubsystem.DroneState.FAULTED);
                         }
                         drone.setVelocity(0, 0);
-                        drone.setState(DroneSubsystem.DroneState.DROPPING_AGENT);
+                        
                         if (t > 0) drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
                     } else {
                         System.out.println("Packet loss detected. Drone deleted.");
@@ -297,7 +305,10 @@ public class Scheduler {
                                     readyLow.add(j, fire);
                                     break;
                             }
-                        } else map.removeFire(fire);
+                        } else {
+                            extinguishedTimes.add(time - fireTimes.get(fire));
+                            map.removeFire(fire);
+                        }
                         drone.setVelocity(-1000 * drone.getX() / (double)t, -1000 * drone.getY() / (double)t);
                         drone.setLocation(scheduled.get(drone).getX(), scheduled.get(drone).getY());
                         drone.setState(DroneSubsystem.DroneState.RETURNING_TO_BASE);
@@ -357,6 +368,16 @@ public class Scheduler {
 
         System.out.println("=== Simulation Summary ===");
         System.out.printf("Total time to extinguish all fires: %.2f minutes\n", (time - minTime) / 60000.0);
+        long sum = 0;
+        for (long responseTime : responseTimes) {
+            sum += responseTime;
+        }
+        System.out.printf("Average response time: %.2f minutes\n", sum / (60000.0 * (double)responseTimes.size()));
+        sum = 0;
+        for (long extinguishedTime: extinguishedTimes) {
+            sum += extinguishedTime;
+        }
+        System.out.printf("Average extinguished time: %.2f minutes\n", sum / (60000.0 * (double)extinguishedTimes.size()));
     }
 
     private long getMinTime() {

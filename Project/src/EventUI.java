@@ -128,10 +128,10 @@ class guiDrawing extends JPanel {
             g.setColor(Color.WHITE);
             coordinates = zone.getCoordinatesAsInt();
             //System.out.println("Rectangle coord:" + coordinates[0] + " " +  coordinates[1]+  " " + coordinates[2]+ " " + coordinates[3]);
-            g.fillRect(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
+            g.fillRect(coordinates[0], coordinates[1], coordinates[2] - coordinates[0], coordinates[3] - coordinates[1]);
             //System.out.println("zone " + (int) zone.getStart().getY() + "Dimensions" + zone.getEnd().getY());
             g.setColor(Color.BLACK);
-            g.fillRect(coordinates[0]+2, coordinates[1] +2, coordinates[2] -2, coordinates[3] -2);
+            g.fillRect(coordinates[0]+2, coordinates[1] +2, coordinates[2] - coordinates[0] -2, coordinates[3] - coordinates[1] -2);
             String temp = String.valueOf(x++);
             g.setColor(Color.WHITE);
             g.drawString(temp, coordinates[0] + 20, coordinates[1] + 20);
@@ -156,7 +156,9 @@ class guiDrawing extends JPanel {
                 g.setColor(Color.YELLOW);
             } else if (drone.getState().equals(DroneSubsystem.DroneState.DROPPING_AGENT)) {
                 g.setColor(Color.CYAN);
-            }
+            } else if (drone.getState().equals(DroneSubsystem.DroneState.FAULTED)) {
+                g.setColor(Color.RED);
+            } 
             g.fillRect((int)(drone.getX() - 5), (int)(drone.getY() - 5), 10, 10);
             String temp = "Drone";
             g.drawString(temp, (int)(drone.getX() + 10), (int)(drone.getY() + 10));

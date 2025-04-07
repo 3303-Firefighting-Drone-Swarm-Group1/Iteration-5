@@ -83,6 +83,15 @@ public class ViewController implements ActionListener {
 
         DroneSubsystem drone1 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6000);
         DroneSubsystem drone2 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6001);
+        DroneSubsystem drone3 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6002);
+        DroneSubsystem drone4 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6003);
+        DroneSubsystem drone5 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6004);
+        DroneSubsystem drone6 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6005);
+        DroneSubsystem drone7 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6006);
+        DroneSubsystem drone8 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6007);
+        DroneSubsystem drone9 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6008);
+        DroneSubsystem drone10 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6009);
+        DroneSubsystem drone11 = new DroneSubsystem(SCHEDULER_HOST, SCHEDULER_PORT, 6010);
 
         try {
             Thread.sleep(10); // let threads initialize
