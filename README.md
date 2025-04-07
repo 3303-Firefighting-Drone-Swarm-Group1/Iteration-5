@@ -1,9 +1,9 @@
-Iteration-4
+Iteration-5
 
 Contributions
-README.TXT - Lucas <br/>
+README.TXT - Sam/Lucas <br/>
 UML Diagrams - Abdulaziz <br/>
-Coding - Ahmed, Sam <br/>
+Coding - Lucas/Sam/Ahmed <br/>
 Testing - Marc <br/>
 
 How to Run <br/>
@@ -12,17 +12,16 @@ Run the Main.java File.
 <br/>
 How to Run Tests <br/>
 *Requires JUnit* <br/>
-(Tests for Iteration 5) Run x y z, if they pass a and b.
-
-<br/>
-Changes implemented in Fifth Iteration <br/>
-Change1 <br/>
-Change2 <br/>
-Change3 <br/>
 
 
-Related Diagrams: <br/>
-Class Diagram of all interacting systems <br/>
-![Class Diagram](Iteration 5/diagrams/SYSC3303_Iteration4_Class.png) <br/> 
-![Timing Diagram](Iteration 5/diagrams/SYSC3303_Iteration4_Timing1.png) <br/>
-![Timing Diagram](Iteration 5/diagrams/SYSC3303_Iteration4_Timing2.png) <br/>
+Changes <br/>
+Total simulation time to extinguish all fires <br/>
+Implement or enforce capacity limits so that drones can only service zones if they have a full water tank <br/>
+Develop a real-time display console GUI to show each drone's current position on a map/grid and report any system faults — designed for use by the fire dispatcher at headquarters <br/>
+
+Related Diagrams:  
+![Class Diagram](Iteration5_Class_Diagram.png)  
+![State Machine Diagram](Iteration5_Drone_State_Machine.png)  
+![Sequence Diagram](Iteration5_Fault_Handling_Task_Sequence_Diagram.png)  
+![Sequence Diagram](Iteration5_Normal_Task_Sequence_Diagram.png)  
+![State Machine Diagram](Iteration5_Scheduler_State_Machine.png)
