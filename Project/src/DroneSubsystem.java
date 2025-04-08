@@ -76,7 +76,7 @@ public class DroneSubsystem {
                 return -1;
             case PACKET_LOSS:
                 state = DroneState.FAULTED;
-                return -1;
+                return -2;
             default:
                 state = DroneState.DROPPING_AGENT;
                 long responseTime = (long) (timeToEmptyTank * incident.getWater() / SIZE_OF_TANK + openCloseNozzle);

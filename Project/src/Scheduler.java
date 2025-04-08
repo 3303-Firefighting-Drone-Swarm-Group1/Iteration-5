@@ -204,7 +204,7 @@ public class Scheduler {
                             System.out.println("Drone arrived at fire at time: " + new Time(time + 18000000));
                             drone.setState(DroneSubsystem.DroneState.DROPPING_AGENT);
                         }
-                        else if (t == -69){
+                        else if (t == -1){ // transient
                             transientFaulted.put(drone, time + 60000);
                             drone.setState(DroneSubsystem.DroneState.FAULTED);
                             Fire fire = scheduled.get(drone);
@@ -228,7 +228,7 @@ public class Scheduler {
                             System.out.println("Drone experienced a transient fault at time: " + new Time(time + 18000000));
                             drone.setState(DroneSubsystem.DroneState.FAULTED);
                         }
-                        else if (t == -420){
+                        else if (t == -2){
                             Fire fire = scheduled.get(drone);
                             fire.clearFault();
                             int j = 0;
